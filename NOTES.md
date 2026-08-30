@@ -116,3 +116,27 @@ what broke, what I did.
   key, not a payment credential, and was already a shared-across-projects
   key rather than newly generated for this submission) but worth doing on
   general hygiene grounds rather than leaving it be.
+- **Hit the exact failure mode the caching architecture was built to
+  prevent — just on a different workload than expected.** Ran the
+  adversarial regression suite (34 fixtures) on the same single
+  `GROQ_API_KEY` already used for two dev-set smoke tests earlier the same
+  day, and hit Groq's 200,000 tokens/day free-tier cap partway through
+  (`Used 198553, Requested 3807`). Every fixture after that point silently
+  became the safe-fallback row instead of a genuine model response — which
+  matters a lot here specifically, because the fallback's risk_flags never
+  include `prompt_injection_attempt`, so a quota-starved run would have
+  looked like a *defense failure* (fixture "not flagged") if reported at
+  face value. Caught by checking `results.csv` before reporting any number:
+  every fixture from `inj_09` onward, and all 10 controls, carried the
+  literal fallback reason text. **Real result: 8/8 genuinely-evaluated
+  attacks correctly flagged (100%), 16 attacks and all 10 controls not yet
+  genuinely tested — not "33% defense rate," which is what a naive read of
+  the summary line would have said.**
+- Fixed `run_suite.py` to resume properly (mirrors `process_cases()`'s
+  existing resume pattern) — a rerun now skips fixtures that already got a
+  genuine answer and retries only the fallback/missing ones, so the 8 good
+  results from this run aren't wasted. Root cause isn't really a bug
+  though — it's that this project only has ONE Groq key configured, so the
+  dev-set testing and the adversarial suite compete for the same daily
+  cap. §6c-2 of the brief's own mitigation list says to add more keys for
+  exactly this reason; that's next, not yet done.
