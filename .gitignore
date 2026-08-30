@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+.cache/
+.pytest_cache/
+dataset/held_out.csv
+dataset/output_heldout.csv
+*.log
