@@ -66,3 +66,53 @@ what broke, what I did.
   has any real logic in it (it's currently a stub that refuses to run
   against held_out at all) — so the git history itself is the evidence that
   the split predates any tuning, per the brief's operational rule.
+
+## 2026-08-30 (Day 3, first live API run)
+
+- **Real bug, found on a 5-case smoke test before it could waste the full
+  dev set:** every single case exhausted all 6 retries and fell back to the
+  safe default. Root cause — the forced final round (`tool_choice` locked
+  to `classify_chargeback`) would fail with a 400 (`tool_use_failed`, or
+  the model attempting a tool that wasn't in that round's tool list), and
+  the outer retry loop responded by resending the *exact same prompt*
+  again. At temperature 0.1, an identical prompt mostly reproduces the
+  identical failure — literally watched it retry the same wrong tool call
+  3 times in a row against an unchanged message list. Fixed by giving the
+  forced round its own local retry (`_run_agent_turn`'s
+  `force_local_retries`) that appends a corrective nudge message before
+  retrying, so the retry actually changes something instead of repeating
+  itself, plus more `max_tokens` headroom since this is a reasoning model
+  (hidden reasoning tokens can eat the whole budget before the visible
+  answer gets written). Re-ran the same 5 cases after the fix: 5/5 real
+  decisions, zero fallbacks, one transient error that self-corrected via
+  the new local retry instead of burning all 6 outer attempts.
+- **Real gap, found in the actual model output, not a hypothetical:** case
+  `cb_0072` had `merchant_repeat_pattern` correctly flagged (via the
+  deterministic override — that part worked exactly as designed) but the
+  model still recommended `contest` instead of routing to a human, which
+  defeats the point of computing that signal at all. The prompt described
+  the flag but never told the model it should change the *decision*, not
+  just get logged. Added one explicit paragraph: a true risk flag should
+  make `manual_review` the default lean, and if the model overrides that
+  anyway, `reason` must say why. Not yet re-verified against a fresh run —
+  next smoke test should confirm this actually changes behavior rather
+  than just reads well.
+- **Security pass, prompted by a direct ask to be careful given who's
+  judging this.** Verified (not assumed) that the real Groq key never
+  touched any tracked file or git history:
+  `git log --all -p | grep gsk_` across every commit returns only the
+  `.env.example` placeholder. Added `scripts/check_no_secrets.py` (scans
+  staged files for Groq/Razorpay/AWS/private-key-shaped strings and any
+  non-placeholder `*_API_KEY`/`*_SECRET` assignment) plus a
+  `scripts/pre-commit` hook, and `SECURITY.md` documenting the actual
+  practices — explicitly scoped honestly (no real cardholder data here,
+  PCI-DSS doesn't apply, but the same discipline is followed anyway,
+  referencing Razorpay's own published security docs).
+- **One real thing worth doing, not yet done:** the reused Groq key's raw
+  value appeared in this session's tool output when it was read from the
+  old Orchestrate repo to copy into `.env` — meaning it exists in this
+  chat's transcript, not just in `.env`. Recommended rotating it at
+  console.groq.com once convenient. Low actual stakes (it's an inference
+  key, not a payment credential, and was already a shared-across-projects
+  key rather than newly generated for this submission) but worth doing on
+  general hygiene grounds rather than leaving it be.

@@ -8,10 +8,14 @@ narrative — this agent decides whether the evidence supports contesting the
 chargeback, supports accepting liability, or needs a human. Every decision
 cites the specific evidence it relied on.
 
-> **Status: Day 1 of 6 (2026-08-30).** Architecture is ported and in place;
-> dataset, evaluation harness, cost model, and robustness suite land over
-> the next few days per the build plan. This README will fill in as those
-> land — see `NOTES.md` for the running build log.
+> **Status: in progress (2026-08-30).** Architecture, dataset, deterministic
+> risk signals, and the adversarial regression suite are in place; the
+> evaluation harness (precision/recall/coverage/cost) against the held-out
+> set lands after code freeze, per the build plan. See
+> [ENGINEERING_DECISIONS.md](ENGINEERING_DECISIONS.md) for the reasoning
+> behind every non-obvious choice below, and [NOTES.md](NOTES.md) for the
+> live build log — including real bugs found on the first live run and how
+> they were fixed.
 
 ---
 
@@ -24,6 +28,16 @@ tests to verify this agent's untrusted-input handling — it does not
 generate novel attacks, does not target third-party systems, and produces
 no offensive capability. It exists so the defense can be measured rather
 than asserted.
+
+## Security
+
+Full detail in [SECURITY.md](SECURITY.md). Short version: no real
+cardholder or merchant data ever touches this repo (synthetic dataset
+only), the only credential in use is an env-var-only LLM inference key,
+`scripts/check_no_secrets.py` gates every commit against leaking one, and
+`_execute_tool()` enforces least-privilege data access at the agent's
+tool-call boundary — the model can never pull another case's data by
+supplying a different ID.
 
 ## The threat model
 
@@ -93,6 +107,7 @@ python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r ../requirements.txt
 cp ../.env.example ../.env  # then add your own GROQ_API_KEY — never commit .env
+cp ../scripts/pre-commit ../.git/hooks/pre-commit  # blocks a commit if it finds a leaked key
 ```
 
 Run the tests (deterministic logic only, no API calls):

@@ -7,4 +7,7 @@ venv/
 .pytest_cache/
 dataset/held_out.csv
 dataset/output_heldout.csv
+dataset/dev/output*.csv
+dataset/dev/cases_smoke.csv
+tests/adversarial_regression/results.csv
 *.log
