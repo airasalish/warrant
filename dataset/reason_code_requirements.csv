@@ -1,0 +1,9 @@
+reason_code,network,description,minimum_evidence_required,required_evidence_types
+10.4,Visa,Card-absent fraud (cardholder says they didn't authorize it),avs_cvv_match and device_fingerprint_or_ip_log,avs_cvv_match|device_fingerprint_or_ip_log
+13.1,Visa,Merchandise/services not received,proof_of_delivery and shipping_carrier_record,proof_of_delivery|shipping_carrier_record
+13.3,Visa,Not as described / defective,product_listing_match and communication_log,product_listing_match|communication_log
+12.6.1,Visa,Duplicate processing,transaction_log_dedup,transaction_log_dedup
+4853,Mastercard,Defective / not as described,product_listing_match and return_policy_ack,product_listing_match|return_policy_ack
+4855,Mastercard,Goods/services not provided,proof_of_delivery and service_completion_record,proof_of_delivery|service_completion_record
+4837,Mastercard,No cardholder authorization,avs_cvv_match and cardholder_ip_device_match,avs_cvv_match|cardholder_ip_device_match
+4863,Mastercard,Cardholder doesn't recognize transaction,avs_cvv_match and prior_purchase_history,avs_cvv_match|prior_purchase_history
