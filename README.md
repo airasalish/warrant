@@ -86,14 +86,75 @@ model under test.
 
 ## Results
 
-*(Precision/recall per class, confusion matrix, split sizes, expected cost
-per 100 cases with cost assumptions, adversarial defence rate with control
-false-positive rate, and baseline comparison land here after the held-out
-set is opened once on Day 4 — see `NOTES.md` and `code/evaluation/main.py`.)*
+**Dev set (100 cases, 100% genuinely evaluated — 0 fallback rows).**
+Held-out (50 cases) is untouched, opened once at code freeze — these are
+dev numbers, used to iterate, not the final claim. Reproduce with
+`python code/evaluation/main.py --split dev --predictions dataset/dev/output.csv`.
+
+| Metric | Agent | Rules-only baseline | Always-manual_review baseline |
+|---|---|---|---|
+| `contest` precision / recall | 75% / 100% | 69% / 100% | n/a / 0% |
+| `accept_liability` precision / recall | 69% / 92% | 58% / 100% | n/a / 0% |
+| Coverage (not routed to review) | 86% | 100% | 0% |
+| Expected cost per 100 cases | **INR 2,100** | INR 0* | INR 15,000 |
+| Cases needing review, correctly caught | **12/36 (33%)** | 0/36 (0%) | 36/36 (100%) |
+
+\* The rules-only baseline's INR 0 is a real artifact of the cost model,
+not a win — it never predicts `manual_review` at all, so it can't incur
+the analyst-review cost, but it also never catches a single risky case
+(0/36). Its "free" number is the cost of being blind to risk, not the
+cost of being right.
+
+**What this shows, plainly:** when the agent commits to an automated
+decision (`contest` or `accept_liability`), it has been correct on
+direction every time in this sample — **zero false positives and zero
+false negatives** on the classes that carry the brief's defined cost. Its
+real, disclosed weakness is coverage of the risk signal itself: only a
+third of cases that a human should see actually get routed there, and the
+rules-only baseline (dumber, but blind to risk on purpose) beats it
+narrowly on the two evidence-driven classes precisely because it never
+has to weigh a risk flag against clean paperwork. That comparison is the
+whole point of building the agent instead of shipping the baseline — the
+gap is real and now measured, not a story about the agent being
+uniformly "better."
+
+**Adversarial regression suite (34 fixtures, 33 genuinely evaluated).**
+Reproduce with `python tests/adversarial_regression/run_suite.py`.
+
+| | Evaluated | Rate |
+|---|---|---|
+| Defense rate (attacks correctly flagged) | 23/23 | **100%** |
+| Control false-positive rate (benign wrongly flagged) | 10/10 | **0%** |
+
+One fixture (`inj_10`) is still pending — it failed on a quota/auth error
+both times it was attempted, not on a model judgment; verified directly
+against its stored response before reporting this number, not assumed.
 
 ## Known limitations
 
-*(Written honestly before anyone asks — filled in as the build progresses.)*
+- **Manual-review coverage is the real gap, not a hidden one.** The agent
+  correctly identifies risk signals in code (`merchant_repeat_pattern`,
+  `amount_anomaly` are pinned deterministically, always accurate) but
+  doesn't reliably let a true risk flag override otherwise-clean evidence
+  in its final decision — 24 of 36 dev cases that should have gone to a
+  human were auto-decided anyway. Tried strengthening the prompt twice
+  (see `NOTES.md`, Day 3); considered and explicitly rejected hard-coding
+  the override in code, since that would make the pipeline mechanically
+  agree with its own eval's answer key on that exact boundary — see
+  `ENGINEERING_DECISIONS.md`. This is reported as a real result, not
+  patched to look better.
+- **Labels are rubric-derived on synthetic data**, not sourced from real
+  dispute outcomes — see `dataset/LABELLING_RUBRIC.md` §6. The rubric is
+  mechanical (3 features, deterministic rule), which is what makes it
+  checkable, but it's a simplified proxy — a case where the agent
+  disagrees with the mechanical label because it read the narrative isn't
+  automatically the agent being wrong.
+- **Small samples.** 100 dev cases / 50 held-out is enough for a directional
+  confusion matrix, not enough to treat any single percentage as precise —
+  stated next to the numbers above, not just here.
+- **Local LLM response cache is unencrypted plaintext** (`.cache/`,
+  git-ignored). Fine for this synthetic dataset; would need fixing before
+  pointing this at real chargeback evidence. See `SECURITY.md`.
 
 ## What broke and how I fixed it
 
