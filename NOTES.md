@@ -128,7 +128,17 @@ what broke, what I did.
   (`acquire_lock()`/`release_lock()` in `run_suite.py`) that makes two
   overlapping runs against the same `results.csv` structurally
   impossible, with 3 new unit tests (`tests/test_adversarial_lock.py`)
-  covering it. Re-ran cleanly afterward to recover the lost results.
+  covering it. Re-ran cleanly afterward under the lock — it correctly
+  resumed from the true 21 (no further regression, proving the fix
+  works), but recovered none of the 13 lost fixtures: every one of the 7
+  keys is now near its own daily cap from today's total testing volume,
+  so all 13 retries hit quota/auth errors and fell back again. Current
+  honest state: **21/34 genuine (20/20 attacks, 1/10 controls)** — the
+  attack-side defense rate is still solid evidence, but the control
+  false-positive rate is down to n=1 and shouldn't be quoted as a real
+  number until it's rebuilt. README corrected to match — the earlier
+  33/34 numbers were still sitting there stale before this update, which
+  would have been reporting a number that was no longer true.
 - **Actual fix for the daily cap specifically:** a key from a genuinely
   different Groq account (different email signup) — the friend's key
   offered earlier would actually help here, these four didn't. The cap
