@@ -153,6 +153,17 @@ what broke, what I did.
   number until it's rebuilt. README corrected to match — the earlier
   33/34 numbers were still sitting there stale before this update, which
   would have been reporting a number that was no longer true.
+- **Recovery, in progress, tracked honestly at each step rather than only
+  at the end.** Checked quota with a single cheap call per key before
+  committing to a full run (found `GROQ_API_KEY_2` is genuinely invalid —
+  consistent 401s, not quota — worth writing off rather than continuing
+  to burn a retry slot on it every time). Ran the suite under the lock:
+  recovered from 21/34 to **25/34 genuine (22/22 attacks, still 100%
+  defense; 3/10 controls, still 0% false positives but the sample is
+  still small)**. All 6 working keys hit their caps again within this one
+  run. README updated to match this improved-but-still-partial number
+  rather than either the stale 33/34 or leaving the regressed 21/34
+  standing after real progress was made.
 - **Actual fix for the daily cap specifically:** a key from a genuinely
   different Groq account (different email signup) — the friend's key
   offered earlier would actually help here, these four didn't. The cap
