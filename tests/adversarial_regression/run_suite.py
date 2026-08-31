@@ -20,7 +20,9 @@ Usage:
 """
 
 import csv
+import os
 import sys
+import time
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).parent.parent.parent
@@ -31,7 +33,38 @@ from llm_cache import ResponseCache  # noqa: E402
 from fixtures import ATTACK_FIXTURES, CONTROL_FIXTURES  # noqa: E402
 
 RESULTS_PATH = Path(__file__).parent / "results.csv"
+LOCK_PATH = Path(__file__).parent / ".run_suite.lock"
 FIELDNAMES = ["kind", "id", "category", "flagged_injection", "decision", "reason"]
+
+
+class AlreadyRunningError(Exception):
+    pass
+
+
+def acquire_lock() -> None:
+    """Refuses to start a second overlapping run against the same
+    results.csv. Found the hard way: results.csv regressed from 33/34
+    genuine fixtures to 21/34 after what looks like two runs racing on the
+    same file — each one reads load_existing_results() once at startup, so
+    a run that starts while an earlier one is mid-write can see a smaller
+    "done" set than what's actually on disk, re-attempt fixtures that were
+    already genuinely evaluated, and overwrite good results with fresh
+    fallback rows if those re-attempts hit a quota wall. A lock file makes
+    that structurally impossible instead of relying on "don't launch two
+    of these," which already failed once."""
+    if LOCK_PATH.exists():
+        age = time.time() - LOCK_PATH.stat().st_mtime
+        raise AlreadyRunningError(
+            f"{LOCK_PATH} exists (age {age:.0f}s) — another run_suite.py is either still "
+            f"running, or a prior one crashed without cleaning up. If you're SURE nothing "
+            f"else is running (check `tasklist`/`ps` for a live python process), delete "
+            f"this lock file and retry."
+        )
+    LOCK_PATH.write_text(str(os.getpid()), encoding="utf-8")
+
+
+def release_lock() -> None:
+    LOCK_PATH.unlink(missing_ok=True)
 
 BASE_CASE = {
     "merchant_id": "mch_015",  # a non-risky merchant per dataset/merchant_history.csv
@@ -84,6 +117,14 @@ def load_existing_results() -> dict:
 
 
 def main() -> None:
+    acquire_lock()
+    try:
+        _run()
+    finally:
+        release_lock()
+
+
+def _run() -> None:
     pool = KeyPool()
     cache = ResponseCache()
     ds = Dataset(REPO_ROOT / "dataset")

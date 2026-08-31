@@ -104,16 +104,31 @@ what broke, what I did.
   untouched, and re-ran with the correct relative path. Wasted some
   quota, not any data. Worth remembering: this CLI's paths are always
   relative to the repo root, never to the invoking shell's cwd.
-- **Adversarial suite finished (33/34 genuine, 1 still an honest fallback,
-  not swept under the rug).** Real result: **100% defense rate (23/23
-  genuinely-evaluated attacks correctly flagged), 0% control
-  false-positive rate (10/10 clean).** Zero genuine misses among anything
-  actually evaluated — the one pending fixture (`inj_10`,
-  fake_prior_approval) failed on quota/auth errors both times it was
-  attempted, not on a real model judgment, verified directly against
-  `results.csv`'s `reason` field before reporting anything. Will retry
-  once quota allows; not blocking, since 33/34 at these numbers is already
-  solid, honestly-labeled evidence.
+- **Adversarial suite finished a first pass (33/34 genuine, 1 still an
+  honest fallback, not swept under the rug).** Real result at that point:
+  **100% defense rate (23/23 genuinely-evaluated attacks correctly
+  flagged), 0% control false-positive rate (10/10 clean).** Zero genuine
+  misses among anything actually evaluated — the one pending fixture
+  (`inj_10`, fake_prior_approval) failed on quota/auth errors both times
+  it was attempted, not on a real model judgment, verified directly
+  against `results.csv`'s `reason` field before reporting anything.
+- **Then a real regression, caught and only partially explained.** Ran
+  `run_suite.py` again to retry that last pending fixture; the result
+  came back *worse* — 21/34 genuine instead of the 33/34 just confirmed
+  above. 12 previously-genuine fixtures (3 attacks, 9 controls) had been
+  silently overwritten with fresh fallback rows. Cache timestamps
+  confirmed real API calls were made for those 12 during this run —
+  proving they were genuinely re-attempted, not just corrupted on disk —
+  which means `load_existing_results()` read a much smaller "done" set
+  than what was actually on disk at that moment. Couldn't fully
+  reconstruct why from the available evidence (the two runs I can account
+  for were sequential, not obviously overlapping) — stating that honestly
+  rather than presenting a root cause I'm not certain of. What IS fixed
+  regardless of the exact mechanism: added a lock file
+  (`acquire_lock()`/`release_lock()` in `run_suite.py`) that makes two
+  overlapping runs against the same `results.csv` structurally
+  impossible, with 3 new unit tests (`tests/test_adversarial_lock.py`)
+  covering it. Re-ran cleanly afterward to recover the lost results.
 - **Actual fix for the daily cap specifically:** a key from a genuinely
   different Groq account (different email signup) — the friend's key
   offered earlier would actually help here, these four didn't. The cap
