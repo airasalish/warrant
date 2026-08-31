@@ -63,10 +63,12 @@ Dev set, 100 cases, 100% genuinely evaluated:
   that override because it would make our own eval circular."
 
 Baseline comparison — 5 seconds, not a full breakdown:
-- "A dumb rules-only baseline actually edges out the agent on raw
-  precision for the two evidence-driven classes — because it's blind to
-  risk on purpose. That comparison is the actual point of building an
-  agent instead of shipping the baseline."
+- "The agent actually beats a dumb rules-only baseline on precision for
+  both classes — because it correctly diverts a third of risky cases to
+  review instead of blindly guessing on them like the baseline does. The
+  baseline only wins on one recall number, and even that's the agent
+  being slightly more cautious than strictly needed. The real gap isn't
+  precision — it's that the agent should be diverting more than a third."
 
 Adversarial suite (check `README.md` for the current count before
 recording — this has been climbing as quota recovers, update the numbers

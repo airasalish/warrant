@@ -139,15 +139,20 @@ cost of being right.
 **What this shows, plainly:** when the agent commits to an automated
 decision (`contest` or `accept_liability`), it has been correct on
 direction every time in this sample — **zero false positives and zero
-false negatives** on the classes that carry the brief's defined cost. Its
-real, disclosed weakness is coverage of the risk signal itself: only a
-third of cases that a human should see actually get routed there, and the
-rules-only baseline (dumber, but blind to risk on purpose) beats it
-narrowly on the two evidence-driven classes precisely because it never
-has to weigh a risk flag against clean paperwork. That comparison is the
-whole point of building the agent instead of shipping the baseline — the
-gap is real and now measured, not a story about the agent being
-uniformly "better."
+false negatives** on the classes that carry the brief's defined cost. The
+agent actually has *higher precision* than the rules-only baseline on
+both classes (75% vs 69%, 69% vs 58%) — because correctly diverting a
+third of risk-flagged cases to `manual_review` means it isn't blindly
+guessing `contest`/`accept_liability` on cases the baseline gets wrong by
+construction. The baseline only wins on one number: `accept_liability`
+recall (100% vs 92%), and even that's not really a baseline strength —
+it's the agent being slightly *more* cautious than strictly necessary on
+2 non-risk cases, routing them to review when the mechanical rule alone
+would have said `accept_liability`. The real, disclosed weakness isn't
+precision — it's coverage of the risk signal itself: only a third of
+cases that a human should see actually get routed there. That's the
+actual gap the agent needs to close, and the baseline comparison exists
+to make it measurable, not to flatter either system.
 
 **Adversarial regression suite (34 fixtures, 28 genuinely evaluated as of
 this writing).**
