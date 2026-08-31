@@ -164,6 +164,14 @@ what broke, what I did.
   run. README updated to match this improved-but-still-partial number
   rather than either the stale 33/34 or leaving the regressed 21/34
   standing after real progress was made.
+- **One more recovery pass: 25 → 26/34 genuine** (23/23 attacks, still
+  100%; 3/3 controls tested, still 0% FP). Diminishing returns now — each
+  pass nets roughly 1 fixture as all 6 working keys tighten toward their
+  caps together from today's total volume. 8 still pending
+  (`inj_24` + 7 controls). Pausing longer between recovery attempts from
+  here rather than grinding for marginal gains — the attack-side number
+  is solid and stable; only the control sample size still needs building
+  back up before quoting it with confidence.
 - **Actual fix for the daily cap specifically:** a key from a genuinely
   different Groq account (different email signup) — the friend's key
   offered earlier would actually help here, these four didn't. The cap

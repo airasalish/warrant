@@ -143,24 +143,26 @@ whole point of building the agent instead of shipping the baseline — the
 gap is real and now measured, not a story about the agent being
 uniformly "better."
 
-**Adversarial regression suite (34 fixtures, 25 genuinely evaluated as of
+**Adversarial regression suite (34 fixtures, 26 genuinely evaluated as of
 this writing).**
 Reproduce with `python tests/adversarial_regression/run_suite.py`.
 
 | | Evaluated | Rate |
 |---|---|---|
-| Defense rate (attacks correctly flagged) | 22/22 | **100%** |
+| Defense rate (attacks correctly flagged) | 23/23 | **100%** |
 | Control false-positive rate (benign wrongly flagged) | 3/10 | **0%, still building — n=3 is directional, not final** |
 
 **Disclosed rather than smoothed over:** a first pass reached 33/34
 genuine (23/23 attacks, 10/10 controls) before a race-condition regression
 between two overlapping runs dropped it to 21/34 — see `NOTES.md` for the
 full story. A lock file now makes that structurally impossible, and
-capacity is being recovered as the daily quota rolls back across 6
-working keys (a 7th, `GROQ_API_KEY_2`, turned out to be genuinely invalid,
-not just rate-limited). Remaining pending as of this writing:
-`inj_23`, `inj_24`, and 7 of 10 controls. **The attack-side number (100%
-defense, n=22) has been stable and solid across every recovery pass so
+capacity is being recovered incrementally as the daily quota rolls back
+across 6 working keys (a 7th, `GROQ_API_KEY_2`, turned out to be
+genuinely invalid, not just rate-limited) — each recovery pass now nets
+roughly 1 more fixture as the rolling window tightens across all 6 keys
+simultaneously from today's total volume. Remaining pending as of this
+writing: `inj_24` and 7 of 10 controls. **The attack-side number (100%
+defense, n=23) has been stable and solid across every recovery pass so
 far; the control false-positive rate is still underpowered (n=3) and
 should not be treated as final until it's back near n=10.**
 
