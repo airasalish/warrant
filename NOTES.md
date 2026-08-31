@@ -67,6 +67,20 @@ what broke, what I did.
   against held_out at all) — so the git history itself is the evidence that
   the split predates any tuning, per the brief's operational rule.
 
+## 2026-08-31 (Day 2, continued — reproducibility check)
+
+- **Verified "clone → install → run" for real**, not just assumed: cloned
+  the repo fresh into an isolated temp directory (from local git, so this
+  checks what's actually committed, not the working directory's state),
+  created a brand-new venv, `pip install -r requirements.txt`, and ran the
+  full test suite — 30/30 passed with zero dependency on anything outside
+  the clone. Confirmed `.env` correctly does not exist in the clone
+  (git-ignored, never committed). Also ran `code/main.py` with no API key
+  configured, to see what a judge's very first run would actually look
+  like: clean `Error: no GROQ_API_KEY* found. Get a free key at
+  https://console.groq.com`, exit code 1 — no stack trace, no confusion.
+  Closes the brief's pre-flight checklist item on this.
+
 ## 2026-08-31 (Day 2, full dev run)
 
 - **Corrected a wrong assumption within the same hour I made it.** Added
