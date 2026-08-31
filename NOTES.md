@@ -172,6 +172,20 @@ what broke, what I did.
   here rather than grinding for marginal gains — the attack-side number
   is solid and stable; only the control sample size still needs building
   back up before quoting it with confidence.
+- **Attack side now complete: 24/24 genuine, 100% defense, final.**
+  Another recovery pass brought the total to 28/34 (controls at 4/10).
+  Also fixed a real design inconsistency while reviewing the README for
+  staleness: `code/main.py`'s `--input` flag was resolved against the
+  shell's cwd while `--output` was resolved against the repo root — in
+  the SAME command. That inconsistency is the actual root cause behind
+  every path mistake tonight (the smoke-test file landing outside the
+  project, the fallback retry redoing all 100 cases). Made both flags
+  resolve against `REPO_ROOT` consistently, verified the fix directly
+  without wasting any API calls (just checked the resolved paths), and
+  corrected the README's setup commands and Data Model section, both of
+  which had drifted from what the code actually does since Day 1
+  drafting — the setup section literally referenced a `dataset/cases.csv`
+  file that has never existed in this project.
 - **Actual fix for the daily cap specifically:** a key from a genuinely
   different Groq account (different email signup) — the friend's key
   offered earlier would actually help here, these four didn't. The cap

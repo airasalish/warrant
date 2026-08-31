@@ -793,14 +793,22 @@ def process_cases(cases_path: Path, dataset_dir: Path, output_path: Path) -> Non
 
 
 def main() -> None:
+    """--input and --output (like --dataset-dir) are always resolved
+    against REPO_ROOT, never the invoking shell's cwd. This used to be
+    inconsistent — --output was REPO_ROOT-relative but --input was
+    cwd-relative, in the same command — and directly caused two real bugs
+    in one session: a case run silently writing outside the project when
+    invoked from code/, and a fallback-retry re-running all 100 cases
+    from scratch because resume detection looked in the wrong place. Both
+    flags now behave the same way on purpose."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset-dir", default="dataset")
-    parser.add_argument("--input", default=None)
-    parser.add_argument("--output", default="dataset/output.csv")
+    parser.add_argument("--input", default=None, help="Resolved against the repo root, not cwd.")
+    parser.add_argument("--output", default="dataset/output.csv", help="Resolved against the repo root, not cwd.")
     args = parser.parse_args()
 
     dataset_dir = REPO_ROOT / args.dataset_dir
-    cases_path = Path(args.input) if args.input else dataset_dir / "cases.csv"
+    cases_path = REPO_ROOT / args.input if args.input else dataset_dir / "cases.csv"
     output_path = REPO_ROOT / args.output
 
     process_cases(cases_path, dataset_dir, output_path)

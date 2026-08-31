@@ -8,26 +8,28 @@ narrative — this agent decides whether the evidence supports contesting the
 chargeback, supports accepting liability, or needs a human. Every decision
 cites the specific evidence it relied on.
 
-> **Status: in progress (2026-08-30).** Architecture, dataset, deterministic
-> risk signals, and the adversarial regression suite are in place; the
-> evaluation harness (precision/recall/coverage/cost) against the held-out
-> set lands after code freeze, per the build plan. See
+> **Status: in progress (2026-08-31).** Architecture, dataset, deterministic
+> risk signals, the evaluation harness, and the adversarial regression
+> suite are all built and have real results below — dev-set numbers are
+> final, adversarial-suite numbers are still filling in as API quota
+> allows (see Results). Held-out evaluation is intentionally untouched
+> until code freeze, per the brief's held-out discipline requirement. See
 > [ENGINEERING_DECISIONS.md](ENGINEERING_DECISIONS.md) for the reasoning
 > behind every non-obvious choice below, and [NOTES.md](NOTES.md) for the
-> live build log — including real bugs found on the first live run and how
-> they were fixed.
+> live build log — including real bugs found on live runs and how they
+> were fixed.
 
 ---
 
 ## Defense-only posture
 
 This project contains no offensive security tooling. The adversarial
-robustness suite (once built, `tests/adversarial_regression/`) will consist
-solely of fixed, publicly-documented injection patterns used as regression
-tests to verify this agent's untrusted-input handling — it does not
-generate novel attacks, does not target third-party systems, and produces
-no offensive capability. It exists so the defense can be measured rather
-than asserted.
+robustness suite (`tests/adversarial_regression/`) consists solely of
+fixed, publicly-documented injection patterns used as regression tests to
+verify this agent's untrusted-input handling — it does not generate novel
+attacks, does not target third-party systems, and produces no offensive
+capability. It exists so the defense can be measured rather than
+asserted — see Results below for the actual numbers.
 
 ## Security
 
@@ -102,12 +104,16 @@ The two rounds are a hard cap (`max_rounds=2`), not an open-ended loop — round
 
 ## Data model
 
-See `code/main.py`'s `Dataset` class docstring for the exact CSV shape
-(`dataset/cases.csv`, `dataset/merchant_history.csv`,
-`dataset/reason_code_requirements.csv`) — built Day 2, along with
-`dataset/LABELLING_RUBRIC.md` documenting how ground-truth labels were
-assigned by hand against real chargeback reason codes, independent of the
-model under test.
+150 synthetic cases, generated deterministically by
+`scripts/generate_dataset.py` (seeded, reproducible) and split 100 dev /
+50 held-out, each in their own directory with a matching `labels.csv`
+that the runtime pipeline never reads (`dataset/dev/cases.csv` +
+`dataset/dev/labels.csv`, same for `held_out/`) — see
+`code/main.py`'s `Dataset` class docstring for the shared reference
+tables (`dataset/merchant_history.csv`,
+`dataset/reason_code_requirements.csv`), and
+`dataset/LABELLING_RUBRIC.md` for exactly how ground-truth labels were
+derived, independent of the model under test.
 
 ## Results
 
@@ -143,14 +149,14 @@ whole point of building the agent instead of shipping the baseline — the
 gap is real and now measured, not a story about the agent being
 uniformly "better."
 
-**Adversarial regression suite (34 fixtures, 26 genuinely evaluated as of
+**Adversarial regression suite (34 fixtures, 28 genuinely evaluated as of
 this writing).**
 Reproduce with `python tests/adversarial_regression/run_suite.py`.
 
 | | Evaluated | Rate |
 |---|---|---|
-| Defense rate (attacks correctly flagged) | 23/23 | **100%** |
-| Control false-positive rate (benign wrongly flagged) | 3/10 | **0%, still building — n=3 is directional, not final** |
+| Defense rate (attacks correctly flagged) | **24/24 (complete)** | **100%** |
+| Control false-positive rate (benign wrongly flagged) | 4/10 | **0%, still building — n=4 is directional, not final** |
 
 **Disclosed rather than smoothed over:** a first pass reached 33/34
 genuine (23/23 attacks, 10/10 controls) before a race-condition regression
@@ -158,12 +164,10 @@ between two overlapping runs dropped it to 21/34 — see `NOTES.md` for the
 full story. A lock file now makes that structurally impossible, and
 capacity is being recovered incrementally as the daily quota rolls back
 across 6 working keys (a 7th, `GROQ_API_KEY_2`, turned out to be
-genuinely invalid, not just rate-limited) — each recovery pass now nets
-roughly 1 more fixture as the rolling window tightens across all 6 keys
-simultaneously from today's total volume. Remaining pending as of this
-writing: `inj_24` and 7 of 10 controls. **The attack-side number (100%
-defense, n=23) has been stable and solid across every recovery pass so
-far; the control false-positive rate is still underpowered (n=3) and
+genuinely invalid, not just rate-limited). All 24 attack fixtures are now
+genuinely evaluated — that side is complete, not partial. Remaining
+pending as of this writing: 6 of 10 controls. **The attack-side number
+(100% defense, n=24, complete) is final; the control false-positive rate
 should not be treated as final until it's back near n=10.**
 
 ## Known limitations
@@ -213,8 +217,32 @@ Run the tests (deterministic logic only, no API calls):
 python -m pytest ../tests/ -v
 ```
 
-Run the pipeline once a dataset exists at `dataset/cases.csv`:
+Run the pipeline against the dev set (already generated and committed —
+re-running is safe and resumes, thanks to the disk cache). `--input` and
+`--output` are both resolved against the repo root, not your shell's cwd
+— no `../` prefix needed even when running from `code/`:
 
 ```bash
-python main.py
+python main.py --input dataset/dev/cases.csv --output dataset/dev/output.csv
+```
+
+Score the predictions (`--predictions` is resolved against the repo root,
+not your shell's cwd — don't prefix it with `../`, that's a real mistake
+this project's own scripts hit once, see `NOTES.md`):
+
+```bash
+python evaluation/main.py --split dev --predictions dataset/dev/output.csv
+```
+
+Run the adversarial regression suite:
+
+```bash
+python ../tests/adversarial_regression/run_suite.py
+```
+
+To regenerate the dataset from scratch (deterministic, same output every
+time given the same seed):
+
+```bash
+python ../scripts/generate_dataset.py
 ```
