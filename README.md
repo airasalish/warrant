@@ -72,8 +72,33 @@ instruction (fine — that's the merchant reporting something) from text that
   before it ever hits the network — re-running the pipeline over the same
   cases costs no additional API calls.
 
-*(Architecture diagram — Mermaid — to be added once the dataset run
-confirms the loop end-to-end.)*
+```mermaid
+sequenceDiagram
+    participant P as code/main.py
+    participant C as llm_cache.py (disk)
+    participant M as Groq (qwen/qwen3.6-27b)
+    participant T as _execute_tool()
+
+    P->>P: build_context() — evidence_sufficiency, amount_anomaly,<br/>merchant_repeat_pattern all computed here, deterministically
+    P->>C: check cache (hash of exact request)
+    alt cache hit
+        C-->>P: cached response — zero API calls
+    else cache miss
+        P->>M: round 1, tool_choice=auto — gather signal or answer directly
+        M-->>P: tool call(s), or a direct classify_chargeback answer
+        P->>C: store response
+    end
+    opt model requested lookup_case_evidence / lookup_merchant_history
+        P->>T: execute — ignores model-supplied case_id/merchant_id,<br/>always resolves against THIS case's real context
+        T-->>P: real evidence items + merchant history
+        P->>M: round 2, tool_choice forced to classify_chargeback
+        M-->>P: decision, evidence_sufficiency, risk_flags, reason, confidence
+    end
+    P->>P: apply_deterministic_overrides() — pins evidence_sufficiency and<br/>the mechanical risk flags to code-computed truth, regardless of model output
+    P->>P: write row → dataset/dev/output.csv
+```
+
+The two rounds are a hard cap (`max_rounds=2`), not an open-ended loop — round 2's `tools` list contains only `classify_chargeback`, so the model is structurally unable to keep gathering info past that point, guaranteeing termination with a structured answer every time.
 
 ## Data model
 
