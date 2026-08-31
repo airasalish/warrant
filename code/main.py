@@ -537,6 +537,21 @@ def _normalize_response(response) -> dict:
     }
 
 
+class LLMCallError(Exception):
+    """Wraps an API-level failure together with the exact key_name that
+    caused it. Exists because a naive `except Exception: pool.next()` at
+    the call site to "find out which key failed" doesn't work — pool.next()
+    just returns whatever's next in rotation, unrelated to which key
+    actually threw. That bug was live in this file (analyze_case used to
+    do exactly this) and meant a real key's failure could get mark_dead()
+    called on a completely different, healthy key. Attaching the key_name
+    at the exact point of failure is the only reliable way to know it."""
+    def __init__(self, original: Exception, key_name: str):
+        super().__init__(str(original))
+        self.original = original
+        self.key_name = key_name
+
+
 def _call_llm(pool: KeyPool, cache: ResponseCache, **kwargs) -> tuple:
     """Cache-checked LLM call. Returns (normalized_response_dict, key_name_or_None).
     key_name is None on a cache hit, since no key was actually used."""
@@ -552,7 +567,10 @@ def _call_llm(pool: KeyPool, cache: ResponseCache, **kwargs) -> tuple:
         return cached, None
 
     client, key_name = pool.next()
-    response = client.chat.completions.create(**kwargs)
+    try:
+        response = client.chat.completions.create(**kwargs)
+    except Exception as e:
+        raise LLMCallError(e, key_name) from e
     normalized = _normalize_response(response)
     cache.put(cache_key_payload, normalized)
     return normalized, key_name
@@ -563,13 +581,16 @@ def _recover_failed_generation(exc: Exception):
     tool_use_failed even though the model produced a complete, correctly
     shaped JSON answer as plain text — visible in the error body's
     failed_generation field. Recovers that answer instead of discarding a
-    real result and burning a retry."""
-    body = getattr(exc, "body", None)
+    real result and burning a retry. Unwraps LLMCallError first since
+    the original Groq exception (with its .body attribute) is what
+    actually carries this, not the wrapper."""
+    original = exc.original if isinstance(exc, LLMCallError) else exc
+    body = getattr(original, "body", None)
     text = None
     if isinstance(body, dict):
         text = body.get("error", {}).get("failed_generation") or body.get("failed_generation")
     if not text:
-        m = re.search(r"'failed_generation':\s*'(\{.*?\})'\s*\}?\s*\}?$", str(exc))
+        m = re.search(r"'failed_generation':\s*'(\{.*?\})'\s*\}?\s*\}?$", str(original))
         if m:
             text = m.group(1)
     if not text:
@@ -683,9 +704,19 @@ def analyze_case(pool: KeyPool, cache: ResponseCache, row: dict, ctx: dict, retr
                 raise ValueError(f"model response missing required fields: {sorted(missing)}")
             return apply_deterministic_overrides(sanitize(result), ctx)
         except Exception as e:
-            err = str(e)
-            _, key_name = pool.next()
-            wait = _handle_error(pool, key_name, err)
+            if isinstance(e, LLMCallError):
+                # The key that actually failed, attached at the point of
+                # failure — not re-guessed via another pool.next() call,
+                # which would just return whatever's next in rotation and
+                # could mark a completely different, healthy key dead.
+                key_name = e.key_name
+                wait = _handle_error(pool, key_name, str(e.original))
+            else:
+                # A non-API failure (JSON parsing, max_rounds exceeded,
+                # etc.) isn't attributable to any specific key, so there's
+                # nothing to mark dead — just back off briefly and retry.
+                key_name = "n/a"
+                wait = 5
             print(f"  Error attempt {attempt + 1} on {key_name} (wait {wait:.0f}s): {e}", file=sys.stderr)
             if attempt < retries - 1:
                 time.sleep(wait)

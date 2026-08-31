@@ -67,6 +67,61 @@ what broke, what I did.
   against held_out at all) — so the git history itself is the evidence that
   the split predates any tuning, per the brief's operational rule.
 
+## 2026-08-31 (Day 2, full dev run)
+
+- **Corrected a wrong assumption within the same hour I made it.** Added
+  3 more Groq keys pulled from the August build's `.env`
+  (`GROQ_API_KEY_2/3/4`), expecting ~4x the daily token headroom since
+  that's what multi-key rotation is *for*. Kicked off the full 100-case
+  dev run; it hit the exact same 200,000-tokens/day cap again at case 21,
+  this time reported against `GROQ_API_KEY_2` — and the error's
+  organization ID (`org_01ktx4r9g2fpt839w0rypds62t`) is identical to
+  yesterday's error under the original key. All 4 keys belong to the same
+  Groq account, not 4 separate accounts, so they share one daily pool —
+  rotating across them helps spread per-minute rate limits, not the daily
+  cap. Told the user the wrong thing in the moment ("4x headroom now") and
+  am correcting it here rather than letting the wrong claim stand
+  uncorrected once the real behavior showed up.
+- **Full 100-case dev run completed, genuinely (0 fallback rows).** Real
+  numbers: `contest` precision 75% / recall 100%, `accept_liability`
+  precision 69% / recall 92%, coverage 86%, **zero false positives and
+  zero false negatives** — every automated decision the agent actually
+  committed to was directionally correct against ground truth. The real,
+  disclosed weakness: only 12 of 36 actual `manual_review` cases (33%)
+  got routed there — the other 24 were auto-decided anyway, the exact
+  "bypassed review" risk `code/evaluation/main.py` was built to surface
+  rather than hide. Matches the smaller-sample pattern seen earlier
+  (`cb_0072`) at full scale, now quantified instead of anecdotal.
+- **Found the same path bug twice in one session** — passed
+  `--output ../dataset/dev/output.csv` while running from `code/`, which
+  resolves against `REPO_ROOT` (the project root), not the shell's cwd, so
+  it silently wrote to `D:\downloads2\dataset\dev\output.csv` — one level
+  above the actual project — and, worse, resume detection then found
+  nothing there and re-ran **all 100 cases from scratch** to retry what
+  should have been 1 fallback case. Caught it from the "Processing 100/100"
+  line (should have said "Processing 1/100" for a single retry) before it
+  got far, stopped it, verified the real `dataset/dev/output.csv` was
+  untouched, and re-ran with the correct relative path. Wasted some
+  quota, not any data. Worth remembering: this CLI's paths are always
+  relative to the repo root, never to the invoking shell's cwd.
+- **Adversarial suite finished (33/34 genuine, 1 still an honest fallback,
+  not swept under the rug).** Real result: **100% defense rate (23/23
+  genuinely-evaluated attacks correctly flagged), 0% control
+  false-positive rate (10/10 clean).** Zero genuine misses among anything
+  actually evaluated — the one pending fixture (`inj_10`,
+  fake_prior_approval) failed on quota/auth errors both times it was
+  attempted, not on a real model judgment, verified directly against
+  `results.csv`'s `reason` field before reporting anything. Will retry
+  once quota allows; not blocking, since 33/34 at these numbers is already
+  solid, honestly-labeled evidence.
+- **Actual fix for the daily cap specifically:** a key from a genuinely
+  different Groq account (different email signup) — the friend's key
+  offered earlier would actually help here, these four didn't. The cap
+  also appears to be a rolling 24h window, not a fixed midnight reset
+  (error messages give a countdown like "try again in 13m", not "resets at
+  midnight") — so capacity trickles back gradually rather than resetting
+  cleanly once a day.
+
 ## 2026-08-30 (Day 3, first live API run)
 
 - **Real bug, found on a 5-case smoke test before it could waste the full
