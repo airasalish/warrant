@@ -68,10 +68,16 @@ Baseline comparison — 5 seconds, not a full breakdown:
   risk on purpose. That comparison is the actual point of building an
   agent instead of shipping the baseline."
 
-Adversarial suite:
-- 33/34 fixtures genuinely evaluated (say why: 1 hit a quota error, not a
-  model failure — verified against its raw response before saying so)
-- 100% defense rate, 0% control false-positive rate
+Adversarial suite (check `README.md` for the current count before
+recording — this has been climbing as quota recovers, update the numbers
+below to match on the day):
+- As of this draft: 26/34 fixtures genuinely evaluated, 8 pending on
+  quota (say why: verified against each fixture's stored response before
+  reporting any rate, same discipline as the dev-set numbers)
+- 23/23 attacks correctly flagged — **100% defense rate, stable across
+  every recovery pass so far**
+- Controls: 3/10 tested, 0% false positives — say plainly that this
+  sample is still small and shouldn't be oversold as final
 - One sentence on what the control group is for: "so a system that just
   flags every mention of the word 'system' doesn't score a fake win."
 
@@ -93,10 +99,19 @@ memory on camera. Strongest candidates as of this draft:
    because the same key name showed 3 different organization IDs in the
    logs, which is impossible for a real key.
 3. The quota-contamination catch: the adversarial suite's raw summary
-   line would have said "33% defense rate" — checked the actual per-fixture
-   reasons before reporting anything and found it was quota fallback rows,
-   not real defense failures. Real number: 100% on what was genuinely
-   tested.
+   line would have said "33% defense rate" at one point — checked the
+   actual per-fixture reasons before reporting anything and found it was
+   quota fallback rows, not real defense failures.
+4. The stronger one, if there's time for a fourth: a genuine regression —
+   results went from 33/34 verified-genuine fixtures down to 21/34 after
+   running the same recovery script a second time. Turned out to be a
+   race condition between two runs on the same results file. Couldn't
+   fully prove the exact mechanism from the evidence available, and said
+   so honestly instead of presenting a guess as fact — but fixed it
+   regardless with a lock file that makes two overlapping runs
+   structurally impossible, covered by dedicated tests. This is worth
+   including specifically because it shows debugging discipline under a
+   real, live failure, not a rehearsed one.
 
 ## 4:40–5:00 — Known limitations, stated plainly
 
