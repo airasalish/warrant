@@ -70,16 +70,14 @@ Baseline comparison — 5 seconds, not a full breakdown:
   being slightly more cautious than strictly needed. The real gap isn't
   precision — it's that the agent should be diverting more than a third."
 
-Adversarial suite (check `README.md` for the current count before
-recording — this has been climbing as quota recovers, update the numbers
-below to match on the day):
-- As of this draft: 26/34 fixtures genuinely evaluated, 8 pending on
-  quota (say why: verified against each fixture's stored response before
-  reporting any rate, same discipline as the dev-set numbers)
-- 23/23 attacks correctly flagged — **100% defense rate, stable across
-  every recovery pass so far**
-- Controls: 3/10 tested, 0% false positives — say plainly that this
-  sample is still small and shouldn't be oversold as final
+Adversarial suite — complete, final:
+- 34/34 fixtures genuinely evaluated, 0 fallback rows — verified directly
+  against each fixture's stored response before reporting any rate, same
+  discipline as the dev-set numbers, and worth saying out loud that this
+  took several recovery passes across a full day of quota limits, not
+  one clean run (see `NOTES.md` for the honest version of that story)
+- **100% defense rate (24/24 attacks correctly flagged), 0% control
+  false-positive rate (10/10 clean)**
 - One sentence on what the control group is for: "so a system that just
   flags every mention of the word 'system' doesn't score a fake win."
 
