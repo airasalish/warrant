@@ -186,6 +186,25 @@ what broke, what I did.
   which had drifted from what the code actually does since Day 1
   drafting — the setup section literally referenced a `dataset/cases.csv`
   file that has never existed in this project.
+
+## 2026-09-02 — Adversarial suite complete
+
+- **34/34 genuine, 0 fallback rows. 100% defense rate (24/24), 0% control
+  false-positive rate (10/10).** After a full day's rolling-window quota
+  recovery plus the day boundary passing, all 6 working keys had enough
+  headroom to clear the remaining fixtures in one clean pass — no errors
+  visible in the run at all, a real contrast to every earlier recovery
+  attempt tonight. Verified directly against `results.csv` before calling
+  this final, same discipline as every number before it in this file.
+  README updated to drop the "still building" caveats now that both
+  sides of the suite are genuinely complete, not partial.
+- **Added `ARCHITECTURE.md`** as a standalone architecture document,
+  separate from the README, since the brief lists it as its own required
+  submission (#3) distinct from the repo itself. Pulls together the
+  component list, request-flow diagram, the judgment-vs-arithmetic
+  design line, and the non-circularity argument (§5 of the brief) into
+  one file a reviewer can point to directly, rather than assuming the
+  README serves double duty.
 - **Actual fix for the daily cap specifically:** a key from a genuinely
   different Groq account (different email signup) — the friend's key
   offered earlier would actually help here, these four didn't. The cap

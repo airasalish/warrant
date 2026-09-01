@@ -8,16 +8,17 @@ narrative — this agent decides whether the evidence supports contesting the
 chargeback, supports accepting liability, or needs a human. Every decision
 cites the specific evidence it relied on.
 
-> **Status: in progress (2026-08-31).** Architecture, dataset, deterministic
+> **Status: in progress (2026-09-02).** Architecture, dataset, deterministic
 > risk signals, the evaluation harness, and the adversarial regression
 > suite are all built and have real results below — dev-set numbers are
 > final, adversarial-suite numbers are still filling in as API quota
 > allows (see Results). Held-out evaluation is intentionally untouched
 > until code freeze, per the brief's held-out discipline requirement. See
-> [ENGINEERING_DECISIONS.md](ENGINEERING_DECISIONS.md) for the reasoning
-> behind every non-obvious choice below, and [NOTES.md](NOTES.md) for the
-> live build log — including real bugs found on live runs and how they
-> were fixed.
+> [ARCHITECTURE.md](ARCHITECTURE.md) for the standalone architecture
+> document (required submission #3), [ENGINEERING_DECISIONS.md](ENGINEERING_DECISIONS.md)
+> for the reasoning behind every non-obvious choice, and
+> [NOTES.md](NOTES.md) for the live build log — including real bugs found
+> on live runs and how they were fixed.
 
 ---
 
@@ -154,26 +155,25 @@ cases that a human should see actually get routed there. That's the
 actual gap the agent needs to close, and the baseline comparison exists
 to make it measurable, not to flatter either system.
 
-**Adversarial regression suite (34 fixtures, 28 genuinely evaluated as of
-this writing).**
+**Adversarial regression suite — complete: 34/34 fixtures genuinely
+evaluated, 0 fallback rows.**
 Reproduce with `python tests/adversarial_regression/run_suite.py`.
 
 | | Evaluated | Rate |
 |---|---|---|
-| Defense rate (attacks correctly flagged) | **24/24 (complete)** | **100%** |
-| Control false-positive rate (benign wrongly flagged) | 4/10 | **0%, still building — n=4 is directional, not final** |
+| Defense rate (attacks correctly flagged) | 24/24 | **100%** |
+| Control false-positive rate (benign wrongly flagged) | 10/10 | **0%** |
 
-**Disclosed rather than smoothed over:** a first pass reached 33/34
-genuine (23/23 attacks, 10/10 controls) before a race-condition regression
-between two overlapping runs dropped it to 21/34 — see `NOTES.md` for the
-full story. A lock file now makes that structurally impossible, and
-capacity is being recovered incrementally as the daily quota rolls back
+**Disclosed rather than smoothed over, including the parts that didn't go
+smoothly:** a first pass reached 33/34 genuine before a race-condition
+regression between two overlapping runs dropped it to 21/34 — a lock file
+now makes that structurally impossible, and every fixture from that point
+was recovered incrementally, in verified batches, as API quota allowed
 across 6 working keys (a 7th, `GROQ_API_KEY_2`, turned out to be
-genuinely invalid, not just rate-limited). All 24 attack fixtures are now
-genuinely evaluated — that side is complete, not partial. Remaining
-pending as of this writing: 6 of 10 controls. **The attack-side number
-(100% defense, n=24, complete) is final; the control false-positive rate
-should not be treated as final until it's back near n=10.**
+genuinely invalid, not just rate-limited). Every number in the table above
+was confirmed directly against each fixture's stored response before
+being reported — never taken from a summary line at face value. Full
+story, including the exact bugs found along the way, in `NOTES.md`.
 
 ## Known limitations
 
