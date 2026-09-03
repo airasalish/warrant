@@ -212,17 +212,21 @@ story, including the exact bugs found along the way, in `NOTES.md`.
 
 ## Known limitations
 
-- **Manual-review coverage is the real gap, not a hidden one.** The agent
-  correctly identifies risk signals in code (`merchant_repeat_pattern`,
+- **Manual-review coverage is the real gap, not a hidden one — and now
+  confirmed hard to move, not just under-attempted.** The agent correctly
+  identifies risk signals in code (`merchant_repeat_pattern`,
   `amount_anomaly` are pinned deterministically, always accurate) but
   doesn't reliably let a true risk flag override otherwise-clean evidence
-  in its final decision — 24 of 36 dev cases that should have gone to a
-  human were auto-decided anyway. Tried strengthening the prompt twice
-  (see `NOTES.md`, Day 3); considered and explicitly rejected hard-coding
-  the override in code, since that would make the pipeline mechanically
-  agree with its own eval's answer key on that exact boundary — see
-  `ENGINEERING_DECISIONS.md`. This is reported as a real result, not
-  patched to look better.
+  in its final decision. Three separate prompt attempts (see `NOTES.md`):
+  the third — inline reminders attached to the actual flag value, plus a
+  worked example — was tested with a controlled before/after on the
+  identical 32 risk-flagged cases and **caught exactly the same 12 both
+  times.** Not an estimate; the same case IDs, confirmed by direct
+  comparison. Explicitly rejected hard-coding the override in code
+  instead, since that would make the pipeline mechanically agree with its
+  own eval's answer key on that exact boundary — see
+  `ENGINEERING_DECISIONS.md`. This is reported as a real, now-verified
+  result, not patched to look better and not left at "still trying."
 - **Labels are rubric-derived on synthetic data**, not sourced from real
   dispute outcomes — see `dataset/LABELLING_RUBRIC.md` §6. The rubric is
   mechanical (3 features, deterministic rule), which is what makes it

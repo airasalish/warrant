@@ -286,3 +286,28 @@ what broke, what I did.
   dev-set testing and the adversarial suite compete for the same daily
   cap. §6c-2 of the brief's own mitigation list says to add more keys for
   exactly this reason; that's next, not yet done.
+
+## 2026-09-03 — Third prompt attempt: confirmed, not just hoped, ineffective
+
+- Ran a genuinely fresh full dev pass under the updated prompt (inline
+  risk-flag reminders + worked example, see the 2026-09-02 entry) to a
+  separate file so resume logic couldn't silently skip it and produce a
+  false "no change" reading. 94/100 genuine after two rounds (6 fallback
+  on the first pass, all 6 still fallback on retry — quota fully spent
+  across all 7 keys by that point, not pursued further).
+- **The real comparison, on the exact same 32 risk-flagged cases in both
+  runs: 12/32 caught under the OLD prompt, 12/32 caught under the NEW
+  prompt. Identical.** Not a rounding difference — the same 12 case_ids,
+  confirmed by direct comparison, not inferred from the aggregate rate.
+  The earlier 15-case smoke test's 6/15 (40%) reading was a real number
+  on a real subset, but not representative of the full, controlled
+  comparison — worth remembering that a promising small sample doesn't
+  guarantee the full-sample result, and this is exactly why the fuller
+  check was worth doing before updating any claim in the README.
+- One good outcome from an otherwise flat result: only 1 of 62 non-risk
+  cases was affected by the prompt change, so the fix that didn't help
+  also didn't measurably hurt anything else.
+- This is the honest, now-confirmed version of what was already
+  disclosed as a real possibility: *"I can't promise a third attempt
+  would fix it."* It didn't. Reporting that directly rather than
+  quietly keeping the more hopeful, earlier-stage framing in the README.
