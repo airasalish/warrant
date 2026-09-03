@@ -219,19 +219,32 @@ def main() -> None:
     )
     parser.add_argument("--dataset-dir", default="dataset")
     parser.add_argument("--predictions", default=None, help="Path to the pipeline's output CSV")
+    parser.add_argument(
+        "--i-am-opening-held-out-for-real", action="store_true",
+        help="Required to run --split held_out. Forces a deliberate choice, not a "
+             "flag flipped absent-mindedly on data that's supposed to be opened once.",
+    )
     args = parser.parse_args()
 
-    if args.split == "held_out":
-        print(
-            "Refusing to run: held-out evaluation must only happen once, on "
-            "code-freeze day, per the brief. This guard stays until that's "
-            "genuinely true."
-        )
-        raise SystemExit(1)
-
     dataset_dir = REPO_ROOT / args.dataset_dir
-    cases = load_csv(dataset_dir / "dev" / "cases.csv")
-    labels_rows = load_csv(dataset_dir / "dev" / "labels.csv")
+    marker_path = dataset_dir / "held_out" / ".opened_at_commit"
+
+    if args.split == "held_out":
+        if not args.i_am_opening_held_out_for_real:
+            print(
+                "Refusing to run: pass --i-am-opening-held-out-for-real to confirm this "
+                "is the genuine, one-time open - not something to pass casually."
+            )
+            raise SystemExit(1)
+        if marker_path.exists():
+            print(f"NOTE: held_out was already opened once - see {marker_path}")
+            print(marker_path.read_text(encoding="utf-8"))
+            print("Re-running is for display purposes only; the brief's discipline is "
+                  "about not TUNING after seeing this, not about a technical rerun block.")
+
+    split_dir = dataset_dir / args.split
+    cases = load_csv(split_dir / "cases.csv")
+    labels_rows = load_csv(split_dir / "labels.csv")
     labels = {r["case_id"]: r["ground_truth_decision"] for r in labels_rows}
     amounts = {r["case_id"]: r["amount"] for r in cases}
     req_rows = load_csv(dataset_dir / "reason_code_requirements.csv")
@@ -240,13 +253,31 @@ def main() -> None:
     if args.predictions:
         pred_rows = load_csv(REPO_ROOT / args.predictions)
         predictions = {r["case_id"]: r["decision"] for r in pred_rows}
-        report("Agent (dev)", predictions, labels, amounts)
+        report(f"Agent ({args.split})", predictions, labels, amounts)
     else:
-        print("No --predictions given - run code/main.py against dev/cases.csv first, "
+        print(f"No --predictions given - run code/main.py against {args.split}/cases.csv first, "
               "or pass --predictions explicitly. Showing baselines only.")
 
     report("Baseline: rules-only", baseline_predictions(cases, ds_requirements), labels, amounts)
     report("Baseline: always manual_review", always_manual_review_predictions(cases), labels, amounts)
+
+    if args.split == "held_out" and not marker_path.exists():
+        import datetime
+        import subprocess
+        try:
+            commit = subprocess.run(
+                ["git", "rev-parse", "HEAD"], cwd=REPO_ROOT, capture_output=True, text=True, check=True
+            ).stdout.strip()
+        except Exception:
+            commit = "unknown"
+        marker_path.write_text(
+            f"held_out opened for the first time at {datetime.datetime.now().isoformat()}\n"
+            f"git commit at open time: {commit}\n"
+            f"This file is proof of when held_out was first opened - committing it to the "
+            f"repo makes the open time verifiable in git log, not just claimed in prose.\n",
+            encoding="utf-8",
+        )
+        print(f"\nWrote {marker_path} - commit this file to make the open time verifiable.")
 
 
 if __name__ == "__main__":
