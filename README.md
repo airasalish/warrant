@@ -360,3 +360,7 @@ an invitation to run it again:
 python main.py --input dataset/held_out/cases.csv --output dataset/held_out/output.csv
 python evaluation/main.py --split held_out --predictions dataset/held_out/output.csv --i-am-opening-held-out-for-real
 ```
+
+## License
+
+[MIT](LICENSE)
