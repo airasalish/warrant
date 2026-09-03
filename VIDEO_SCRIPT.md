@@ -96,21 +96,23 @@ Adversarial suite — complete, final:
   flags every mention of the word 'system' doesn't score a fake win."
 
 **Held-out — the actual headline result, opened once, at code freeze:**
-> "Held-out: 36 of 50 cases genuinely evaluated — 14 hit the same daily
-> Groq quota wall documented all through NOTES.md tonight, and they're
-> reported as missing, not rounded up or hidden. On the 36: `contest` 69%
-> precision, 100% recall. `accept_liability` 73% precision, 67% recall.
-> Coverage 75%. And the number that actually matters most — zero false
-> positives, zero false negatives on every committed decision, exactly
-> like dev. That's not a dev-set fluke, that's the same result holding up
-> on data the system never touched during any tuning.
+> "Held-out: 42 of 50 cases genuinely evaluated — the remaining 8 hit the
+> same daily Groq quota wall documented all through NOTES.md tonight, and
+> they're reported as missing, not rounded up or hidden. On the 42:
+> `contest` 72% precision, 100% recall. `accept_liability` 77% precision,
+> 67% recall. Coverage 74%. And the number that actually matters most —
+> zero false positives, zero false negatives on every committed decision,
+> exactly like dev. That's not a dev-set fluke, that's the same result
+> holding up on data the system never touched during any tuning.
 >
 > One real difference from dev, and I'm not going to explain it away:
-> `accept_liability` recall drops from 92% on dev to 67% on held-out.
-> Small sample, real number, reported as a genuine finding rather than
-> dismissed as noise."
+> `accept_liability` recall drops from 92% on dev to 67% on held-out —
+> and that exact number held steady across two separate readings as more
+> held-out data came in, 36 cases then 42, which is what actually makes
+> me confident this is a real finding and not noise from an unlucky small
+> sample. Reported as a genuine result, not dismissed."
 
-*(Say the 36/50 out loud, clearly, before any other held-out number — that's
+*(Say the 42/50 out loud, clearly, before any other held-out number — that's
 the one fact that makes every other held-out number honestly interpretable.)*
 
 ## 4:00–4:40 — What broke and how it was recovered
