@@ -57,9 +57,10 @@ layer.
 
 Merchant-submitted narrative text and evidence descriptions are treated as
 **data, not instructions** — see the `SYSTEM_PROMPT` untrusted-input block
-in `code/main.py` and the adversarial regression suite (in progress,
-`tests/adversarial_regression/`, see the main README's defense-only
-posture statement). The threat model: a party with a direct financial
+in `code/main.py` and the adversarial regression suite
+(`tests/adversarial_regression/`, complete — 100% defense rate, 0%
+control false-positive rate, see the main README's Results section). The
+threat model: a party with a direct financial
 interest in the model's decision can write arbitrary text into a field the
 model reads, so that field cannot be trusted as authoritative about what
 the model itself should do.
