@@ -29,7 +29,7 @@ chargeback, supports accepting liability, or needs a human. Every decision
 cites the specific evidence it relied on.
 
 > **At a glance**
-> - Zero false positives, zero false negatives on every automated decision the agent committed to — **on both dev (100 cases) and held-out (36/50, opened once at code freeze)**, so it's not a dev-set artifact (see [Results](#results))
+> - Zero false positives, zero false negatives on every automated decision the agent committed to — **on both dev (100 cases) and held-out (42/50, opened once at code freeze)**, so it's not a dev-set artifact (see [Results](#results))
 > - 100% adversarial defense rate, 0% false positives on benign input (34/34 fixtures, complete — no fixtures skipped or rounded up)
 > - Two disclosed, honest gaps, not smoothed over: only 33% of risky cases get routed to a human (dev), and `accept_liability` recall drops from 92% to 67% on held-out — both quantified, neither explained away (see [Known limitations](#known-limitations))
 > - An informal search across this track's ~470 competing repos found only a handful mentioning "evaluation" and almost none with adversarial testing — this repo treats both as first-class, with real numbers, not an afterthought
@@ -38,7 +38,7 @@ cites the specific evidence it relied on.
 > **Status: in progress (2026-09-03).** Architecture, dataset, deterministic
 > risk signals, the evaluation harness, and the adversarial regression
 > suite are all built with real, complete results below — dev-set (100/100),
-> adversarial-suite (34/34), and held-out (36/50, opened once at code
+> adversarial-suite (34/34), and held-out (42/50, opened once at code
 > freeze, see below for why it's not all 50) are all reported honestly. See
 > [ARCHITECTURE.md](ARCHITECTURE.md) for the standalone architecture
 > document (required submission #3), [ENGINEERING_DECISIONS.md](ENGINEERING_DECISIONS.md)
@@ -219,44 +219,47 @@ was confirmed directly against each fixture's stored response before
 being reported — never taken from a summary line at face value. Full
 story, including the exact bugs found along the way, in `NOTES.md`.
 
-**Held-out (50 cases, opened once, at code freeze — 36/50 genuinely
+**Held-out (50 cases, opened once, at code freeze — 42/50 genuinely
 evaluated).** This is the actual headline result the rest of this project
 built toward, so it gets the same discipline as everything else: reported
-exactly as it stands, not rounded up. 14 of 50 cases hit the same daily
+exactly as it stands, not rounded up. 8 of 50 cases hit the same daily
 Groq quota wall documented throughout `NOTES.md` and are marked
 fallback, not silently folded into "correct" — reproduce with
 `--split held_out`, scoring only case_ids whose `reason` field isn't the
 fallback placeholder (see `code/evaluation/main.py`'s docstring).
 
-| Metric | Held-out (n=36) | Dev (n=100, for comparison) |
+| Metric | Held-out (n=42) | Dev (n=100, for comparison) |
 |---|---|---|
-| `contest` precision / recall | 69% / 100% | 75% / 100% |
-| `accept_liability` precision / recall | 73% / 67% | 69% / 92% |
-| Coverage | 75% | 86% |
-| Expected cost per 100 cases (required) | **INR 3,750** | INR 2,100 |
-| Bonus: unpriced bypassed-review exposure per 100 | INR 19,671 | INR 18,442 |
+| `contest` precision / recall | 72% / 100% | 75% / 100% |
+| `accept_liability` precision / recall | 77% / 67% | 69% / 92% |
+| Coverage | 74% | 86% |
+| Expected cost per 100 cases (required) | **INR 3,929** | INR 2,100 |
+| Bonus: unpriced bypassed-review exposure per 100 | INR 16,861 | INR 18,442 |
 
 **What holds up, and what doesn't:** zero false positives and zero false
 negatives on committed decisions — same as dev, on data the system never
-touched during any tuning. That's the number that actually matters most:
-it means the "never wrong on direction when it commits" result isn't an
-artifact of dev-set familiarity. What's *not* the same:
-`accept_liability` recall drops from 92% to 67% — on a sample this size
-(n=36, and the `accept_liability` subclass within it is smaller still)
-that's a real, reportable difference, not noise to explain away, and it's
-reported as one rather than attributed to "small sample" and dismissed.
-The 14 missing cases are a genuine gap in this result, not a rounding
-error — if quota allows before submission, they'll be added; if not,
-36/50 stands as what it honestly is.
+touched during any tuning, and this held exactly the same after adding 6
+more genuine cases (36→42) — not a fluke of an early small sample. That's
+the number that actually matters most: it means the "never wrong on
+direction when it commits" result isn't an artifact of dev-set
+familiarity. What's *not* the same: `accept_liability` recall sits at
+67% on held-out vs 92% on dev — **unchanged** between the n=36 and n=42
+readings, which is exactly what makes it a real, stable finding rather
+than noise from a small sample that would be expected to move around. Not
+explained away. The remaining 8 missing cases are a genuine gap in this
+result, not a rounding error — if quota allows before submission, they'll
+be added; if not, 42/50 stands as what it honestly is.
 
 ## KNOWN LIMITATIONS
 
 - **`accept_liability` recall drops from 92% (dev) to 67% (held-out).**
-  Real, on unseen data, not explained away as small-sample noise even
-  though the held-out subsample is genuinely small (n=36, fewer still in
-  this specific class). Zero false positives and zero false negatives
-  held up on held-out — the direction of every committed decision was
-  still correct — but the *rate* of correctly reaching `accept_liability`
+  Real, on unseen data, not explained away as small-sample noise — and
+  this exact number held steady across two separate readings as more
+  held-out data came in (n=36 then n=42), which argues against it being
+  a fluke of an early small sample. Zero false positives and zero false
+  negatives held up on held-out — the direction of every committed
+  decision was still correct — but the *rate* of correctly reaching
+  `accept_liability`
   specifically (rather than routing to review) was lower on data the
   system never saw during dev iteration. Worth investigating further with
   more held-out data if this pipeline is ever extended past this

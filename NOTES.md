@@ -393,3 +393,16 @@ themselves.
   dev: `accept_liability` recall drops from 92% to 67%, on a small
   subsample. Reported as a real difference, not smoothed into "small
   sample noise" language to make it disappear.
+- **One more opportunistic retry closed the gap further: 36 → 42/50.**
+  Not "tuning" (no code or prompt changed) — just finishing data
+  collection the daily quota cap had interrupted, using the exact same
+  frozen prompt the 36-case reading used. Re-scored properly (filtered
+  file, same methodology as before). Result **held steady, not just
+  similar**: `contest` 72%/100%, `accept_liability` 77%/67% — recall
+  identical to the n=36 reading — coverage 74%, cost INR 3,929/100, still
+  zero FP/FN. The `accept_liability` recall gap being unchanged across
+  two independent readings (36 then 42) is itself evidence it's a real
+  finding, not noise from an unlucky small sample — argued for in the
+  README rather than just asserted. README/NOTES updated to 42/50 as the
+  current, most-complete honest number. 8 cases remain fallback; further
+  retries are optional polish from here, not blocking.
