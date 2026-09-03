@@ -29,9 +29,15 @@ distilled "why," organized by concern instead of by day.
   rejected: it would make the pipeline mechanically agree with its own
   eval's answer key on that decision boundary, which turns "precision/
   recall on this class" into a tautology instead of a measurement. Pushed
-  the prompt harder instead (see NOTES.md, Day 3) and will report whatever
-  the model actually does — including disagreement — as a disclosed
-  result, not a hidden one.
+  the prompt harder instead — three separate attempts total (see
+  NOTES.md) — and the third was tested with a controlled before/after on
+  the identical risk-flagged cases rather than just eyeballed: it made
+  **zero measurable difference**, the exact same case IDs caught both
+  times. That's now a confirmed result, not a hoped-for one, and it's
+  reported as such rather than left at "still improving it." The decision
+  not to hard-code the override stands regardless of that outcome — a
+  fix that happens to raise the number isn't the same thing as a fix
+  that's actually true.
 - **What IS pinned in code, and why that's different:** `evidence_
   sufficiency` and the three mechanically-derivable risk flags
   (`evidence_incomplete_for_reason_code`, `amount_anomaly`,
