@@ -300,3 +300,16 @@ time given the same seed):
 ```bash
 python ../scripts/generate_dataset.py
 ```
+
+**Held-out is intentionally not something you casually re-run.** The
+evaluation harness refuses `--split held_out` unless you pass
+`--i-am-opening-held-out-for-real`, and the first genuine run writes a
+committed marker (`dataset/held_out/.opened_at_commit`) recording exactly
+when it was opened — that's the command this project actually ran, kept
+here for transparency about what "opened once" means in practice, not as
+an invitation to run it again:
+
+```bash
+python main.py --input dataset/held_out/cases.csv --output dataset/held_out/output.csv
+python evaluation/main.py --split held_out --predictions dataset/held_out/output.csv --i-am-opening-held-out-for-real
+```
