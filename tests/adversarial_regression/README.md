@@ -52,3 +52,13 @@ just the attack-defense rate alone:
 Full per-fixture results land in `results.csv` (git-ignored — regenerate
 by running the suite; the numbers belong in the main README, not as a
 committed artifact that goes stale).
+
+It resumes automatically — a rerun skips any fixture that already got a
+genuine (non-fallback) answer and only retries what's still pending, so
+API quota spent on an earlier partial run is never wasted. It also
+refuses to start a second overlapping run (`AlreadyRunningError`, backed
+by a lock file) — added after a real incident where two runs racing on
+the same `results.csv` silently overwrote 12 good results with fresh
+fallback rows (see the main repo's `NOTES.md`). If you see that error and
+you're sure nothing else is actually running, delete
+`.run_suite.lock` and retry.
