@@ -96,23 +96,25 @@ Adversarial suite — complete, final:
   flags every mention of the word 'system' doesn't score a fake win."
 
 **Held-out — the actual headline result, opened once, at code freeze:**
-> "Held-out: 42 of 50 cases genuinely evaluated — the remaining 8 hit the
+> "Held-out: 45 of 50 cases genuinely evaluated — the remaining 5 hit the
 > same daily Groq quota wall documented all through NOTES.md tonight, and
-> they're reported as missing, not rounded up or hidden. On the 42:
-> `contest` 72% precision, 100% recall. `accept_liability` 77% precision,
-> 67% recall. Coverage 74%. And the number that actually matters most —
+> they're reported as missing, not rounded up or hidden. On the 45:
+> `contest` 74% precision, 100% recall. `accept_liability` 80% precision,
+> 71% recall. Coverage 76%. And the number that actually matters most —
 > zero false positives, zero false negatives on every committed decision,
 > exactly like dev. That's not a dev-set fluke, that's the same result
 > holding up on data the system never touched during any tuning.
 >
 > One real difference from dev, and I'm not going to explain it away:
-> `accept_liability` recall drops from 92% on dev to 67% on held-out —
-> and that exact number held steady across two separate readings as more
-> held-out data came in, 36 cases then 42, which is what actually makes
-> me confident this is a real finding and not noise from an unlucky small
-> sample. Reported as a genuine result, not dismissed."
+> `accept_liability` recall on held-out has read 67%, 67%, then 71% across
+> three progressively larger samples as more data came in — moving a
+> little, as expected on a small sample, but staying consistently well
+> below dev's 92% every single time rather than trending back toward it.
+> That consistency across three separate readings, not one exact repeated
+> number, is what makes me confident it's a real finding and not noise
+> from an unlucky sample. Reported as a genuine result, not dismissed."
 
-*(Say the 42/50 out loud, clearly, before any other held-out number — that's
+*(Say the 45/50 out loud, clearly, before any other held-out number — that's
 the one fact that makes every other held-out number honestly interpretable.)*
 
 ## 4:00–4:40 — What broke and how it was recovered

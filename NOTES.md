@@ -406,3 +406,21 @@ themselves.
   README rather than just asserted. README/NOTES updated to 42/50 as the
   current, most-complete honest number. 8 cases remain fallback; further
   retries are optional polish from here, not blocking.
+- **User explicitly asked to push toward 50/50; one more retry closed 3
+  more (42 → 45).** Re-scored the same way as before (filter to genuine,
+  score only those). This time the `accept_liability` recall number
+  actually moved — 67% at n=36, still 67% at n=42, now 71% at n=45 — so
+  the earlier README claim that it was "unchanged" is no longer accurate
+  and was corrected rather than left standing. Real lesson: a number
+  matching across 2 readings isn't proof it's fixed, it can still move on
+  the 3rd — correcting the claim promptly when new data contradicts it is
+  the same discipline as getting it right the first time, just applied to
+  a claim already in the README, not just a fresh one. Still well below
+  dev's 92% in every single reading, which is the part that hasn't
+  moved and is the actual honest takeaway.
+- 5 cases remain fallback after this round. Multiple stubborn GitHub
+  contributor-cache issue detours happened in parallel with this (empty
+  commit, then archive/unarchive - the second one eventually worked,
+  confirmed via both API and a fresh browser check) - unrelated to the
+  held-out work itself, noted here only because it consumed real time
+  during the same stretch.
