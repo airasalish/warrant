@@ -38,9 +38,12 @@ cites the specific evidence it relied on.
 > **Status: in progress (2026-09-03).** Architecture, dataset, deterministic
 > risk signals, the evaluation harness, and the adversarial regression
 > suite are all built with real, complete results below — dev-set (100/100)
-> and adversarial-suite (34/34) numbers are both final. Held-out evaluation
-> is intentionally untouched until code freeze, per the brief's held-out
-> discipline requirement. See
+> and adversarial-suite (34/34) numbers are both final. Held-out has been
+> opened, at code freeze, exactly once (per the brief's held-out
+> discipline) — data collection is genuinely in progress and quota-limited
+> tonight rather than complete; see `NOTES.md` for the live, honest count
+> as it fills in, and this section will carry the final numbers once it's
+> done. No numbers are being reported here until they're real. See
 > [ARCHITECTURE.md](ARCHITECTURE.md) for the standalone architecture
 > document (required submission #3), [ENGINEERING_DECISIONS.md](ENGINEERING_DECISIONS.md)
 > for the reasoning behind every non-obvious choice, and

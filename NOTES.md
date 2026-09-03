@@ -360,3 +360,9 @@ themselves.
   3-6+ hours from the observed trickle rate) or adding more keys, chose
   to wait rather than add keys this time. Honest estimate given, not
   softened, and NOTES.md/the user were both told the same number.
+- **Live progress, updated as it moves rather than only at the end:**
+  cautious retry cycles (cheap ping first, no large verification calls —
+  that was the mistake above) are recovering roughly 2-6 genuine cases
+  per cycle. 2 → 8 → 12 → 14 → 18/50 genuine across cycles so far, each
+  number confirmed directly against `output.csv`'s `reason` field, never
+  assumed from log pacing. Real, if slow, progress — not stalled.
