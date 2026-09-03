@@ -199,9 +199,13 @@ Return JSON only — no markdown fences, no extra keys."""
 
 class KeyPool:
     """Round-robins across every GROQ_API_KEY / GROQ_API_KEY_2 / GROQ_API_KEY_3 ... found
-    in the environment, so load (and each account's separate daily quota) is spread across
-    all of them instead of hammering one key into its cap. Ported as-is from the August
-    Orchestrate build — generic, no domain coupling."""
+    in the environment, spreading per-minute rate-limit load across all of them instead of
+    hammering one key. Does NOT multiply the daily token cap by itself — Groq's daily quota
+    is per ACCOUNT, so multiple keys generated from the same account share one pool
+    (confirmed directly from the API: same-account keys show the identical `organization`
+    ID when rate-limited, see NOTES.md). Real daily-cap headroom only comes from keys on
+    genuinely separate accounts. Ported as-is from the August Orchestrate build — generic,
+    no domain coupling."""
 
     def __init__(self):
         keys = []
