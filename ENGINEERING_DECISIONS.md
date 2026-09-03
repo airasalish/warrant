@@ -49,9 +49,14 @@ distilled "why," organized by concern instead of by day.
   is: pin what's actually deterministic, never pin what requires reading
   the narrative.
 - **Held-out split committed in its own commit, before any evaluation
-  logic exists in the repo** — `git log` order is the evidence, not a
-  claim (see the commit history; `code/evaluation/main.py` still refuses
-  `--split held_out` outright as of this writing).
+  logic existed in the repo** — `git log` order is the evidence, not a
+  claim. `code/evaluation/main.py` refused `--split held_out` outright
+  for the entire dev-iteration phase; once code freeze genuinely arrived,
+  that hard refusal was replaced with an explicit opt-in flag
+  (`--i-am-opening-held-out-for-real`) plus a committed marker file
+  recording the exact commit and timestamp held-out was first opened —
+  so the "opened once, deliberately" claim stays verifiable in git log
+  even after the guard's own mechanism changed.
 
 ## Reliability under real quota constraints
 
