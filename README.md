@@ -1,16 +1,23 @@
 <div align="center">
-  <img src="assets/logo.png" alt="warrant logo" width="104">
+  <img src="assets/logo.png" alt="warrant logo" width="120">
 
-  # warrant
-  ### because a hunch isn't evidence
+  # WARRANT
 
-  *Chargeback Evidence Responder — Razorpay AI Buildathon 2026, Track 2: AI Risk Manager*
+  ### BECAUSE A HUNCH ISN'T EVIDENCE
 
-  ![Track 02](https://img.shields.io/badge/Track_02-AI_Risk_Manager-2f6fed?style=flat-square)
-  ![Defense only](https://img.shields.io/badge/security_posture-defense--only-2f6fed?style=flat-square)
-  ![Tests](https://img.shields.io/badge/tests-33_passing-2ea44f?style=flat-square)
-  ![Adversarial defense](https://img.shields.io/badge/adversarial_defense-100%25_(34%2F34)-2ea44f?style=flat-square)
-  ![False positives](https://img.shields.io/badge/false_positives-0-2ea44f?style=flat-square)
+  *Chargeback Evidence Responder — Razorpay AI Buildathon 2026, Track 02: AI Risk Manager*
+
+  ![Track 02](https://img.shields.io/badge/TRACK_02-AI_RISK_MANAGER-2f6fed?style=for-the-badge)
+  ![Defense only](https://img.shields.io/badge/POSTURE-DEFENSE--ONLY-2f6fed?style=for-the-badge)
+
+  ![Tests](https://img.shields.io/badge/TESTS-33_PASSING-2ea44f?style=for-the-badge)
+  ![Adversarial defense](https://img.shields.io/badge/ADVERSARIAL_DEFENSE-100%25-2ea44f?style=for-the-badge)
+  ![False positives](https://img.shields.io/badge/FALSE_POSITIVES-ZERO-2ea44f?style=for-the-badge)
+
+  ---
+
+  ### ZERO FALSE POSITIVES · ZERO FALSE NEGATIVES · 100% ADVERSARIAL DEFENSE
+  #### every number on this page is checked against its raw source before it's written down — see [NOTES.md](NOTES.md)
 </div>
 
 ---
@@ -48,7 +55,7 @@ cites the specific evidence it relied on.
 
 ---
 
-## Defense-only posture
+## DEFENSE-ONLY POSTURE
 
 This project contains no offensive security tooling. The adversarial
 robustness suite (`tests/adversarial_regression/`) consists solely of
@@ -142,7 +149,7 @@ tables (`dataset/merchant_history.csv`,
 `dataset/LABELLING_RUBRIC.md` for exactly how ground-truth labels were
 derived, independent of the model under test.
 
-## Results
+## RESULTS
 
 **Dev set (100 cases, 100% genuinely evaluated — 0 fallback rows).**
 Held-out (50 cases) is untouched, opened once at code freeze — these are
@@ -213,7 +220,7 @@ was confirmed directly against each fixture's stored response before
 being reported — never taken from a summary line at face value. Full
 story, including the exact bugs found along the way, in `NOTES.md`.
 
-## Known limitations
+## KNOWN LIMITATIONS
 
 - **Manual-review coverage is the real gap, not a hidden one — and now
   confirmed hard to move, not just under-attempted.** The agent correctly
