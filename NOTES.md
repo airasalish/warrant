@@ -369,3 +369,27 @@ themselves.
   at once, not a steady linear trickle). Each
   number confirmed directly against `output.csv`'s `reason` field, never
   assumed from log pacing. Real, if slow, progress — not stalled.
+- **Final decision: score at 36/50 rather than keep chasing the last 14.**
+  One more retry after the 21→36 jump made zero additional progress
+  (quota exhausted again immediately). At that point: proceeded to run
+  the evaluation harness rather than wait indefinitely.
+- **Caught a real methodology bug seconds before it would have shipped
+  wrong numbers.** `code/evaluation/main.py`'s `report()` doesn't filter
+  fallback rows automatically — the first evaluation run scored all 50
+  predictions including the 14 fallback rows, silently corrupting the
+  confusion matrix (fallback rows default to `manual_review`, so they
+  don't error, they just quietly bias the numbers). Caught it by noticing
+  the reported `n=50 scored` didn't match the known 36-genuine count,
+  before writing anything into the README. Built a filtered
+  predictions file containing only the 36 genuine case_ids and re-scored
+  against that instead. This is exactly the kind of thing the project's
+  own `is_fallback_row` discipline exists to catch — and it almost didn't
+  catch it here, because the evaluation harness itself was the one gap
+  that never got that same filtering treatment until now.
+- **Real, final numbers, n=36/50:** `contest` 69% precision / 100% recall,
+  `accept_liability` 73% precision / 67% recall, coverage 75%, expected
+  cost INR 3,750/100 (required metric) with zero false positives and zero
+  false negatives — same as dev. The one real, reportable difference from
+  dev: `accept_liability` recall drops from 92% to 67%, on a small
+  subsample. Reported as a real difference, not smoothed into "small
+  sample noise" language to make it disappear.
