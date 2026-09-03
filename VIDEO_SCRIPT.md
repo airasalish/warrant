@@ -95,14 +95,23 @@ Adversarial suite — complete, final:
 - One sentence on what the control group is for: "so a system that just
   flags every mention of the word 'system' doesn't score a fake win."
 
-**Held-out (50 cases) — check the actual current status before recording:**
-> If the held-out numbers are in by recording time: state them exactly as
-> README reports them, with the same honesty framing as dev — sample
-> size, what's genuinely evaluated vs. still pending, no rounding up.
-> If they're not in yet: say so directly. "Held-out is being run once,
-> at code freeze, per the brief's own discipline — quota has made that
-> slower than expected tonight, and I'm reporting exactly where that
-> stands rather than a projected number."
+**Held-out — the actual headline result, opened once, at code freeze:**
+> "Held-out: 36 of 50 cases genuinely evaluated — 14 hit the same daily
+> Groq quota wall documented all through NOTES.md tonight, and they're
+> reported as missing, not rounded up or hidden. On the 36: `contest` 69%
+> precision, 100% recall. `accept_liability` 73% precision, 67% recall.
+> Coverage 75%. And the number that actually matters most — zero false
+> positives, zero false negatives on every committed decision, exactly
+> like dev. That's not a dev-set fluke, that's the same result holding up
+> on data the system never touched during any tuning.
+>
+> One real difference from dev, and I'm not going to explain it away:
+> `accept_liability` recall drops from 92% on dev to 67% on held-out.
+> Small sample, real number, reported as a genuine finding rather than
+> dismissed as noise."
+
+*(Say the 36/50 out loud, clearly, before any other held-out number — that's
+the one fact that makes every other held-out number honestly interpretable.)*
 
 ## 4:00–4:40 — What broke and how it was recovered
 
@@ -126,10 +135,17 @@ memory on camera. Strongest candidates as of this draft:
    that makes two overlapping runs structurally impossible, covered by
    dedicated tests. Worth including specifically because it shows
    debugging discipline under a real, live failure, not a rehearsed one.
-4. **The quota-contamination catch, if there's time for a fourth:** a raw
-   summary line would have said "33% defense rate" at one point — checked
-   the actual per-fixture reasons before reporting anything and found it
-   was quota fallback rows, not real defense failures.
+4. **The held-out scoring bug, if there's time for a fourth — arguably the
+   highest-stakes catch of the whole build:** the evaluation script
+   doesn't automatically exclude cases that failed and fell back to a
+   safe default. The very first held-out evaluation run scored all 50
+   predictions including 14 that were fake fallback rows, silently
+   corrupting the confusion matrix. Caught it because the reported
+   sample size didn't match the known genuine count — not a hunch, a
+   number that didn't add up — filtered to the real 36 cases, and
+   re-scored before anything went into this README. This was seconds
+   away from putting fabricated numbers into the one result the entire
+   submission was built toward.
 
 ## 4:40–5:00 — Known limitations, stated plainly
 
