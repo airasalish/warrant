@@ -27,7 +27,7 @@ justification, a confidence score, and the specific evidence IDs cited.
 | Agent loop | `code/main.py::_run_agent_turn` | Bounded, 2-round tool-calling loop against Groq (`qwen/qwen3.6-27b`). See §3. |
 | `_execute_tool` | `code/main.py` | Executes an info-gathering tool call. Ignores every model-supplied argument; always resolves against the pipeline's own context for the current case. |
 | `apply_deterministic_overrides` | `code/main.py` | Post-processes the model's output, pinning evidence sufficiency and the three mechanically-derivable risk flags to the code-computed value regardless of what the model said. |
-| Evaluation harness | `code/evaluation/main.py` | Confusion matrix, precision/recall/coverage, false-positive cost model, two baselines. `--split held_out` refuses to run until code freeze. |
+| Evaluation harness | `code/evaluation/main.py` | Confusion matrix, precision/recall/coverage, false-positive cost model, two baselines. `--split held_out` required a one-time explicit opt-in flag; held-out has now been opened, at code freeze, with real results in the README. |
 | Dataset generator | `scripts/generate_dataset.py` | Deterministic, seeded synthetic case generator. Contains the ground-truth labelling rule — deliberately not importable from `code/main.py` (see §5). |
 | Adversarial suite | `tests/adversarial_regression/` | Fixed, publicly-documented injection-pattern fixtures + benign controls, run against the real pipeline. |
 
