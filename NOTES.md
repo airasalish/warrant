@@ -363,6 +363,9 @@ themselves.
 - **Live progress, updated as it moves rather than only at the end:**
   cautious retry cycles (cheap ping first, no large verification calls —
   that was the mistake above) are recovering roughly 2-6 genuine cases
-  per cycle. 2 → 8 → 12 → 14 → 18/50 genuine across cycles so far, each
+  per cycle. 2 → 8 → 12 → 14 → 18 → 21 → 36/50 genuine across cycles so
+  far (that last jump — 21 to 36 in one cycle — suggests a meaningful
+  chunk of yesterday's usage finally aged out of the rolling 24h window
+  at once, not a steady linear trickle). Each
   number confirmed directly against `output.csv`'s `reason` field, never
   assumed from log pacing. Real, if slow, progress — not stalled.
