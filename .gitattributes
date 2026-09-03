@@ -1,0 +1,9 @@
+# Normalize line endings to LF in the repo, regardless of what a
+# contributor's local git config does on checkout - eliminates the
+# "LF will be replaced by CRLF" warning seen on every commit without one.
+* text=auto eol=lf
+
+# Binary files - never touch line endings, never diff as text
+*.png binary
+*.jpg binary
+*.jpeg binary

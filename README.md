@@ -14,6 +14,8 @@
   ![Adversarial defense](https://img.shields.io/badge/ADVERSARIAL_DEFENSE-100%25-2ea44f?style=for-the-badge)
   ![False positives](https://img.shields.io/badge/FALSE_POSITIVES-ZERO-2ea44f?style=for-the-badge)
 
+  Built by **Aira K. Salish** ([@airasalish](https://github.com/airasalish))
+
   ---
 
   ### ZERO FALSE POSITIVES · ZERO FALSE NEGATIVES · 100% ADVERSARIAL DEFENSE
