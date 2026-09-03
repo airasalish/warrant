@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="assets/logo.png" alt="warrant logo" width="120">
+</div>
+
 # Chargeback Evidence Responder
 
 ![Track 02](https://img.shields.io/badge/Track_02-AI_Risk_Manager-1b2838?style=flat-square)
