@@ -4,6 +4,22 @@ Kept live from Day 1. This feeds the README's "what broke and how I fixed it"
 section and the video, per Razorpay's explicit ask. Two lines per entry:
 what broke, what I did.
 
+**Index, in true chronological order** — entries below aren't always in
+this order in the file, because this is a genuinely live log (new
+findings got added near related earlier context, not always appended at
+the end). Not reordering the actual entries below, since a "kept live"
+log that's been retroactively resequenced isn't really live anymore —
+this index exists so a reader doesn't have to reconstruct the timeline
+themselves.
+
+1. [Day 1](#2026-08-30-day-1) — repo up, architecture ported
+2. [Day 2, continued](#2026-08-30-day-2-continued-same-session) — dataset, rubric, split committed
+3. [Day 3, first live API run](#2026-08-30-day-3-first-live-api-run) — retry bug, key-attribution bug found and fixed
+4. [Day 2, reproducibility check](#2026-08-31-day-2-continued--reproducibility-check) — clone/install/run verified end to end
+5. [Day 2, full dev run](#2026-08-31-day-2-full-dev-run) — 100/100 genuine, real precision/recall/cost numbers
+6. [Adversarial suite complete](#2026-09-02--adversarial-suite-complete) — 34/34, race-condition regression found and fixed with a lock file
+7. [Third prompt attempt confirmed ineffective](#2026-09-03--third-prompt-attempt-confirmed-not-just-hoped-ineffective) — controlled before/after, no improvement
+
 ---
 
 ## 2026-08-30 (Day 1)
