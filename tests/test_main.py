@@ -134,6 +134,29 @@ def test_execute_tool_ignores_model_supplied_args_and_uses_ctx():
     assert "error" in result3
 
 
+def test_execute_tool_adds_inline_reminder_only_when_flag_is_true():
+    base_ctx = {
+        "transaction_summary": "amount=500 INR",
+        "minimum_evidence_required": "delivery proof",
+        "merchant_narrative": "we shipped it",
+        "evidence_candidates": [],
+        "evidence_sufficiency_precomputed": "sufficient",
+        "missing_evidence_types": [],
+        "merchant_history_summary": "chargeback_rate_30d=1.2%",
+    }
+    # Flag false - no reminder field at all, not even an empty one.
+    no_flag_ctx = {**base_ctx, "amount_anomaly_flag": False, "merchant_repeat_pattern_flag": False}
+    assert "amount_anomaly_flag_reminder" not in _execute_tool("lookup_case_evidence", no_flag_ctx)
+    assert "merchant_repeat_pattern_flag_reminder" not in _execute_tool("lookup_merchant_history", no_flag_ctx)
+
+    # Flag true - reminder present, and it says the flag is true.
+    flagged_ctx = {**base_ctx, "amount_anomaly_flag": True, "merchant_repeat_pattern_flag": True}
+    r1 = _execute_tool("lookup_case_evidence", flagged_ctx)
+    assert "TRUE" in r1["amount_anomaly_flag_reminder"]
+    r2 = _execute_tool("lookup_merchant_history", flagged_ctx)
+    assert "TRUE" in r2["merchant_repeat_pattern_flag_reminder"]
+
+
 def test_apply_deterministic_overrides_pins_evidence_sufficiency():
     ctx = {
         "evidence_sufficiency_precomputed": "insufficient",

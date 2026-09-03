@@ -153,6 +153,16 @@ X which is not the kind of case the pattern flag is about"). A reason that doesn
 all is not an acceptable justification for departing from the default — it means the flag was overlooked, \
 not overridden.
 
+Worked example, so this isn't abstract: a case has fully sufficient evidence for its reason code (both \
+required items present, nothing missing) AND merchant_repeat_pattern_flag=true. The WRONG output here is \
+decision=contest with a reason that only discusses the evidence ("ev_1 and ev_2 satisfy the requirement, \
+therefore contest") — that reason never mentions the flag, which means it was never actually weighed. The \
+RIGHT output is decision=manual_review, with reason opening on the flag itself: "merchant_repeat_pattern \
+is flagged for this merchant; despite ev_1 and ev_2 meeting the evidence requirement, the repeat-dispute \
+pattern warrants human review before this is auto-contested." Sufficient evidence alone never settles a \
+case where a risk flag is present — it settles the evidence question, not the risk question, and both \
+have to be answered.
+
 reason must name the SPECIFIC evidence you relied on (e.g. "ev_2 is a signed delivery confirmation \
 matching the transaction date and address; reason code 13.1 requires exactly this"), not a generic \
 restatement of the decision.
@@ -508,8 +518,22 @@ def _execute_tool(name: str, ctx: dict) -> dict:
     another case's or merchant's data. The tool's authority is the
     pipeline's own ground truth, not the model's claim about which record
     it wants. Ported as-is in spirit from the August build."""
+    # Third attempt at the manual_review-coverage gap (see NOTES.md,
+    # ENGINEERING_DECISIONS.md): two prompt-only attempts that stated the
+    # override rule once, in the abstract, in the system prompt, weren't
+    # reliably followed — a real risk flag would come back true and the
+    # model would still just... proceed as if it hadn't. Different tactic
+    # this time: repeat the instruction INLINE, attached to the actual
+    # flag value at the moment the model reads it, instead of only in a
+    # system-prompt paragraph written before the model has seen any real
+    # data. Proximity to the fact, not just louder wording.
+    RISK_FLAG_REMINDER = (
+        "This flag is TRUE for this case. Per your instructions, manual_review is your "
+        "default decision when this is true — evidence being otherwise sufficient is not, "
+        "by itself, a reason to override it."
+    )
     if name == "lookup_case_evidence":
-        return {
+        result = {
             "transaction_summary": ctx["transaction_summary"],
             "minimum_evidence_required": ctx["minimum_evidence_required"],
             "merchant_narrative": ctx["merchant_narrative"],
@@ -518,11 +542,17 @@ def _execute_tool(name: str, ctx: dict) -> dict:
             "missing_evidence_types": ctx["missing_evidence_types"],
             "amount_anomaly_flag": ctx["amount_anomaly_flag"],
         }
+        if ctx["amount_anomaly_flag"]:
+            result["amount_anomaly_flag_reminder"] = RISK_FLAG_REMINDER
+        return result
     if name == "lookup_merchant_history":
-        return {
+        result = {
             "merchant_history_summary": ctx["merchant_history_summary"],
             "merchant_repeat_pattern_flag": ctx["merchant_repeat_pattern_flag"],
         }
+        if ctx["merchant_repeat_pattern_flag"]:
+            result["merchant_repeat_pattern_flag_reminder"] = RISK_FLAG_REMINDER
+        return result
     return {"error": f"unknown tool {name}"}
 
 
