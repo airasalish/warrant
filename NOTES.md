@@ -19,6 +19,7 @@ themselves.
 5. [Day 2, full dev run](#2026-08-31-day-2-full-dev-run) — 100/100 genuine, real precision/recall/cost numbers
 6. [Adversarial suite complete](#2026-09-02--adversarial-suite-complete) — 34/34, race-condition regression found and fixed with a lock file
 7. [Third prompt attempt confirmed ineffective](#2026-09-03--third-prompt-attempt-confirmed-not-just-hoped-ineffective) — controlled before/after, no improvement
+8. [Held-out run: quota exhaustion](#2026-09-03--held-out-run-quota-exhaustion-and-a-verification-method-that-backfired) — a "smarter" quota check that backfired by consuming its own headroom
 
 ---
 
@@ -327,3 +328,35 @@ themselves.
   disclosed as a real possibility: *"I can't promise a third attempt
   would fix it."* It didn't. Reporting that directly rather than
   quietly keeping the more hopeful, earlier-stage framing in the README.
+
+## 2026-09-03 — Held-out run: quota exhaustion, and a verification method that backfired
+
+- Opened held-out for real (50 cases). First pass: 49/50 fell back —
+  every key was already sitting within ~2,000 tokens of its daily cap
+  from the night's total testing volume, and a real request needs
+  ~2,500-4,000. Not bad luck; the math simply didn't allow most requests
+  to succeed. Confirmed by pulling the exact `Used X/200000` figure per
+  key from the raw log rather than estimating.
+- **A "smarter" quota check made the very next retry worse, not
+  better.** Cheap 10-token pings had already been shown to give a false
+  "all clear" signal (a tiny request can succeed even with almost no real
+  headroom), so before retrying, checked each key with a realistically
+  large (2,500-token) request instead — a genuinely better signal in
+  principle. All 6 succeeded. Retried immediately. Result: 2/50 genuine
+  this time — barely moved. Root cause, worked out after the fact: with
+  each key already down to ~700-2,000 tokens of margin, the verification
+  request itself was large enough to consume most of that margin just to
+  confirm it existed — leaving almost nothing for the real retry that
+  followed seconds later. A good verification method in normal
+  conditions became actively counterproductive in a razor-thin-margin
+  situation, because measuring the resource consumed the resource.
+- Real lesson for razor-thin quota situations specifically: neither a
+  cheap ping (false positive) nor a realistic-sized check (consumes what
+  it's checking) is reliable. The only trustworthy signal left is the
+  actual per-key `Used/200000` figures pulled from real error messages,
+  cross-referenced against how many tokens the upcoming batch actually
+  needs — arithmetic, not a probe.
+- Given the choice between waiting out natural recovery (estimated
+  3-6+ hours from the observed trickle rate) or adding more keys, chose
+  to wait rather than add keys this time. Honest estimate given, not
+  softened, and NOTES.md/the user were both told the same number.
