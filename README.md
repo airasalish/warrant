@@ -1,16 +1,19 @@
 <div align="center">
-  <img src="assets/logo.png" alt="warrant logo" width="120">
+  <img src="assets/logo.png" alt="warrant logo" width="104">
+
+  # warrant
+  ### because a hunch isn't evidence
+
+  *Chargeback Evidence Responder — Razorpay AI Buildathon 2026, Track 2: AI Risk Manager*
+
+  ![Track 02](https://img.shields.io/badge/Track_02-AI_Risk_Manager-2f6fed?style=flat-square)
+  ![Defense only](https://img.shields.io/badge/security_posture-defense--only-2f6fed?style=flat-square)
+  ![Tests](https://img.shields.io/badge/tests-33_passing-2ea44f?style=flat-square)
+  ![Adversarial defense](https://img.shields.io/badge/adversarial_defense-100%25_(34%2F34)-2ea44f?style=flat-square)
+  ![False positives](https://img.shields.io/badge/false_positives-0-2ea44f?style=flat-square)
 </div>
 
-# Chargeback Evidence Responder
-
-![Track 02](https://img.shields.io/badge/Track_02-AI_Risk_Manager-1b2838?style=flat-square)
-![Tests](https://img.shields.io/badge/tests-33_passing-2ea44f?style=flat-square)
-![Adversarial defense](https://img.shields.io/badge/adversarial_defense-100%25_(34%2F34)-2ea44f?style=flat-square)
-![False positives](https://img.shields.io/badge/false_positives-0-2ea44f?style=flat-square)
-![Defense only](https://img.shields.io/badge/security_posture-defense--only-1b2838?style=flat-square)
-
-**Razorpay AI Buildathon 2026 — Track 2: AI Risk Manager**
+---
 
 One class of loss: **chargebacks.** Given a chargeback case — reason code,
 transaction, the merchant's submitted evidence, and their free-text
@@ -25,12 +28,12 @@ cites the specific evidence it relied on.
 > - An informal search across this track's ~470 competing repos found only a handful mentioning "evaluation" and almost none with adversarial testing — this repo treats both as first-class, with real numbers, not an afterthought
 > - Every number below was checked against its raw source before being written down — including a mistake caught in this README's own draft (see [NOTES.md](NOTES.md))
 
-> **Status: in progress (2026-09-02).** Architecture, dataset, deterministic
+> **Status: in progress (2026-09-03).** Architecture, dataset, deterministic
 > risk signals, the evaluation harness, and the adversarial regression
-> suite are all built and have real results below — dev-set numbers are
-> final, adversarial-suite numbers are still filling in as API quota
-> allows (see Results). Held-out evaluation is intentionally untouched
-> until code freeze, per the brief's held-out discipline requirement. See
+> suite are all built with real, complete results below — dev-set (100/100)
+> and adversarial-suite (34/34) numbers are both final. Held-out evaluation
+> is intentionally untouched until code freeze, per the brief's held-out
+> discipline requirement. See
 > [ARCHITECTURE.md](ARCHITECTURE.md) for the standalone architecture
 > document (required submission #3), [ENGINEERING_DECISIONS.md](ENGINEERING_DECISIONS.md)
 > for the reasoning behind every non-obvious choice, and
