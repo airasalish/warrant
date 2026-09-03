@@ -128,14 +128,26 @@ dev numbers, used to iterate, not the final claim. Reproduce with
 | `contest` precision / recall | 75% / 100% | 69% / 100% | n/a / 0% |
 | `accept_liability` precision / recall | 69% / 92% | 58% / 100% | n/a / 0% |
 | Coverage (not routed to review) | 86% | 100% | 0% |
-| Expected cost per 100 cases | **INR 2,100** | INR 0* | INR 15,000 |
+| Expected cost per 100 cases (required, brief §6b) | **INR 2,100** | INR 0* | INR 15,000 |
 | Cases needing review, correctly caught | **12/36 (33%)** | 0/36 (0%) | 36/36 (100%) |
+| Bonus: unpriced bypassed-review exposure per 100 cases† | **INR 18,442** | INR 27,367 | INR 0 |
 
 \* The rules-only baseline's INR 0 is a real artifact of the cost model,
 not a win — it never predicts `manual_review` at all, so it can't incur
 the analyst-review cost, but it also never catches a single risky case
 (0/36). Its "free" number is the cost of being blind to risk, not the
 cost of being right.
+
+† **Not part of the brief's required cost model** — the brief prices
+exactly two error directions, and this is a third one it doesn't define
+a price for. Modeled as 10% of the transaction amount for every case
+that had a real risk signal but got auto-decided anyway, since that
+exposure scales with what's at stake, unlike the flat analyst-review
+cost above — a stated assumption, not a measured one. Reported
+separately, never folded into the required number, specifically so this
+doesn't get silently absorbed into "the cost is INR 2,100" when the full
+picture is meaningfully larger. This number is *why* the 33% coverage
+gap above is the real headline weakness, not a footnote to it.
 
 **What this shows, plainly:** when the agent commits to an automated
 decision (`contest` or `accept_liability`), it has been correct on

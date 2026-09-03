@@ -114,3 +114,22 @@ def test_expected_cost_flags_bypassed_review_without_pricing_it():
     assert result["n_false_positive"] == 0
     assert result["n_false_negative"] == 0
     assert result["total_cost_inr"] == 0  # not priced, but counted - see n_bypassed_review
+
+
+def test_bypassed_review_bonus_exposure_kept_out_of_required_cost():
+    predictions = {"c1": "contest"}
+    labels = {"c1": "manual_review"}
+    result = expected_cost(predictions, labels, amounts={"c1": "10000"})
+    # bonus metric computed correctly...
+    assert result["bypassed_review_exposure_inr"] == 10000 * _eval_main.BYPASSED_REVIEW_EXPOSURE_RATE
+    # ...but never folds into the brief's required, mandatory cost number
+    assert result["total_cost_inr"] == 0
+    assert result["cost_per_100_inr"] == 0
+
+
+def test_bypassed_review_bonus_exposure_zero_when_none_bypassed():
+    predictions = {"c1": "manual_review"}
+    labels = {"c1": "manual_review"}  # correctly routed, not bypassed
+    result = expected_cost(predictions, labels, amounts={"c1": "10000"})
+    assert result["n_bypassed_review"] == 0
+    assert result["bypassed_review_exposure_inr"] == 0

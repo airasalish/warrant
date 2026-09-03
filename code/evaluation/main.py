@@ -49,6 +49,15 @@ COST_FALSE_POSITIVE_INR = 800
 # above so it's not confused with an error cost.
 COST_MANUAL_REVIEW_INR = 150
 
+# Third, bonus/exploratory metric — NOT part of the brief's mandatory
+# cost model (§6b prices exactly two error directions). Models the
+# unpriced exposure from a case that had a real risk signal but got
+# auto-decided anyway (a "bypassed review") as a fraction of the
+# transaction amount, since that exposure scales with what's at stake,
+# unlike the flat manual_review labor cost above. A stated assumption,
+# not a measured one.
+BYPASSED_REVIEW_EXPOSURE_RATE = 0.10
+
 DECISION_VALUES = ["contest", "accept_liability", "manual_review"]
 POSITIVE_CLASSES = ["contest", "accept_liability"]  # manual_review excluded - see module docstring
 
@@ -115,14 +124,29 @@ def expected_cost(predictions: dict, labels: dict, amounts: dict) -> dict:
     # high-risk case), so it's counted and surfaced rather than silently
     # folded into "correct" just because it doesn't match either FP/FN
     # definition.
-    n_bypassed_review = sum(
-        1 for case_id, actual in labels.items()
+    bypassed_ids = [
+        case_id for case_id, actual in labels.items()
         if actual == "manual_review" and predictions.get(case_id) in ("contest", "accept_liability")
+    ]
+    # Bonus/exploratory metric, NOT part of the brief's mandatory cost
+    # model (§6b defines exactly two error directions) and deliberately
+    # kept out of total_cost_inr/cost_per_100_inr above, so the required
+    # number stays exactly what the brief asked for. Modeled as a fraction
+    # of the transaction amount rather than a flat fee, because unlike the
+    # manual_review labor cost (a known, fixed analyst-time cost), the
+    # exposure from skipping a warranted review scales with what's at
+    # stake in the case - a stated assumption, not a measured one, since
+    # real-world outcomes for bypassed reviews aren't observable in this
+    # dataset.
+    bypassed_review_exposure_inr = sum(
+        float(amounts.get(case_id, 0)) * BYPASSED_REVIEW_EXPOSURE_RATE for case_id in bypassed_ids
     )
     return {
         "n_scored": n_scored, "total_cost_inr": total_cost, "cost_per_100_inr": per_100,
         "n_false_positive": n_fp, "n_false_negative": n_fn, "n_manual_review": n_review,
-        "n_bypassed_review": n_bypassed_review,
+        "n_bypassed_review": len(bypassed_ids),
+        "bypassed_review_exposure_inr": bypassed_review_exposure_inr,
+        "bypassed_review_exposure_per_100_inr": (bypassed_review_exposure_inr / n_scored * 100) if n_scored else 0.0,
     }
 
 
@@ -177,8 +201,12 @@ def report(name: str, predictions: dict, labels: dict, amounts: dict) -> None:
           f"manual_review={cost['n_manual_review']} x INR{COST_MANUAL_REVIEW_INR})")
     if cost["n_bypassed_review"]:
         print(f"  WARNING: {cost['n_bypassed_review']} case(s) had actual=manual_review but were "
-              f"auto-decided anyway - a real risk not priced in the cost above (brief only prices "
-              f"the contest/accept_liability error directions). Not hidden, just not double-defined.")
+              f"auto-decided anyway - not priced in the required cost above (brief only prices "
+              f"the contest/accept_liability error directions).")
+        print(f"  BONUS (not part of the brief's cost model, exploratory only): modeling that "
+              f"exposure at {BYPASSED_REVIEW_EXPOSURE_RATE:.0%} of transaction amount gives "
+              f"INR {cost['bypassed_review_exposure_per_100_inr']:.0f} per 100 cases in unpriced risk "
+              f"- reported separately so it's never confused with the required, brief-defined number.")
     if n < 30:
         print(f"  NOTE: small sample (n={n}) - treat these rates as directional, not final.")
 
