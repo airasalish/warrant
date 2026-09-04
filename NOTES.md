@@ -424,3 +424,18 @@ themselves.
   confirmed via both API and a fresh browser check) - unrelated to the
   held-out work itself, noted here only because it consumed real time
   during the same stretch.
+- **2026-09-04 — held-out complete: 50/50, no fallback, no asterisks.**
+  Three more retry cycles on the last 5 cases all made zero progress
+  (quota uniformly near-capped across all 6 working keys each time,
+  confirmed from the raw `Used X/200000` figures, not guessed). What
+  finally worked wasn't a smarter retry - it was the calendar rolling
+  over to a new day. Tried immediately after the date changed specifically
+  because of that, and all 5 went through cleanly on the first attempt.
+  Final, complete numbers: `contest` 73%/100%, `accept_liability` 75%/71%,
+  coverage 76%, cost INR 3,600/100 (required metric) with zero false
+  positives and zero false negatives across the full 50 - not a partial
+  sample anymore. `accept_liability` recall's final reading (71%) matches
+  the n=45 reading exactly, closing out a number that moved twice earlier
+  (67% -> 67% -> 71% -> 71%) at a stable final value, well below dev's
+  92% in every single reading. README/NOTES/VIDEO_SCRIPT all updated to
+  the final, complete result - no more "X of 50" caveats anywhere.
